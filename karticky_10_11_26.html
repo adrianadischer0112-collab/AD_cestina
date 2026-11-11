@@ -85,6 +85,12 @@ details summary{cursor:pointer;font-weight:700}
 .fb .full{font-family:"Literata",Georgia,serif;font-size:1.1rem}
 .fb .tr{color:var(--muted);font-style:italic}
 .fb .btns{margin-top:12px}
+.trig{text-decoration:underline;text-decoration-style:dotted;text-decoration-thickness:2px;text-underline-offset:4px}
+.suf{color:var(--sign);font-weight:700}
+.clues{list-style:none;padding:0;margin:8px 0 0;font-size:.95rem}
+.clues li{margin:5px 0}
+.cheat{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.cheat p{margin:4px 0;font-size:.95rem}
 .why{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .why summary{font-weight:700;cursor:pointer;font-size:.95rem}
 .login{max-width:420px;margin:10vh auto 0}
@@ -203,22 +209,64 @@ const GRAMMAR = {
   ]}
 };
 
-/* Vocab: [czech, english]. Separate accepted translations with "/".
+
+/* Clues shown after answering: t = word that triggers the case (as it appears in the sentence),
+   tn = explanation, suf = [word, ending, explanation], p = pattern note */
+const CLUES = {
+  "S tebou můžu mluvit o ___.": {t:"o", tn:"o (about) always takes the locative.", p:"všem ends like tom (o tom = about it). Most vš- forms copy the endings of ten: toho → všeho, tomu → všemu, tom → všem, tím → vším."},
+  "Ptal jsem se na to ___ učitelů.": {t:"Ptal jsem se", tn:"ptát se (to ask someone) always takes the genitive: ptát se koho?", suf:[["učitelů","ů","is the genitive plural ending for masculine nouns."]]},
+  "Znám ___ herce z divadla.": {t:"Znám", tn:"znát takes a direct object, so the accusative.", suf:[["herce","e","is the accusative plural ending for soft masculine animate nouns (herec → herce)."]]},
+  "Rozdal dárky ___ dětem.": {t:"Rozdal", tn:"you hand something out to someone, so the receiver is in the dative.", suf:[["dětem","em","is a dative plural ending. Others to recognize: -ům (kamarádům) and -ám (knihám)."]]},
+  "Napsal jsem jména ___ studentů.": {t:"jména", tn:"\"the names of\" puts the next noun in the genitive.", suf:[["studentů","ů","is the genitive plural ending for masculine nouns."]]},
+  "Pracovaly na tom ___ kolegyně.": {suf:[["Pracovaly","y","in the past tense signals a feminine (or masculine inanimate) plural subject. Masculine animate would be pracovali."],["kolegyně","ě","is the nominative plural ending for soft feminine nouns."]]},
+  "Znám ___ auta.": {t:"Znám", tn:"znát takes a direct object, so the accusative.", suf:[["auta","a","is the neuter plural ending, and neuter goes with všechna."]]},
+  "Potřebuju ___ kamarády.": {t:"Potřebuju", tn:"potřebovat takes a direct object, so the accusative.", suf:[["kamarády","y","marks the masculine animate accusative plural. Compare the nominative kamarádi (-i), which goes with všichni."]]},
+  "Mluvil jsem se ___ kamarády.": {t:"se", tn:"s/se (with) always takes the instrumental.", suf:[["kamarády","y","looks the same as the accusative here, so the ending alone can't tell you the case. The preposition se is what makes it instrumental."]]},
+  "Přišli ___ kamarádi.": {suf:[["Přišli","i","in the past tense signals a masculine animate plural subject."],["kamarádi","i","is the masculine animate nominative plural ending, the one place všichni is used."]]},
+  "Na výlet půjdeme se ___ spolužáky.": {t:"se", tn:"s/se (with) always takes the instrumental.", suf:[["spolužáky","y","is the instrumental plural ending for hard masculine nouns. Feminine nouns usually use -ami (knihami)."]]},
+  "Bojí se úplně ___.": {t:"Bojí se", tn:"bát se (to be afraid of) always takes the genitive: bát se čeho?", p:"všeho ends like toho, the genitive of ten."},
+  "Mluvíme spolu o ___ problémech.": {t:"o", tn:"o (about) always takes the locative.", suf:[["problémech","ech","is a locative plural ending. Also watch for -ách and -ích."]]},
+  "Už jsme viděli ___ památky.": {t:"viděli", tn:"vidět takes a direct object, so the accusative.", suf:[["památky","y","is the feminine accusative plural ending, the same as the feminine nominative plural."]]},
+  "___ jsem už zapomněl.": {t:"zapomněl", tn:"zapomenout takes a direct object (what?), so the accusative.", p:"Neuter všechno looks the same in the nominative and accusative."},
+  "Rozumíš ___?": {t:"Rozumíš", tn:"rozumět always takes the dative: rozumět komu? čemu?", p:"všemu ends like tomu, the dative of ten."},
+  "Vypil jsi ___ čaj?": {t:"Vypil", tn:"vypít takes a direct object, so the accusative.", p:"Masculine inanimate nouns look the same in the nominative and accusative (čaj → čaj), so všechen stays všechen."},
+  "Se ___ ti rád pomůžu.": {t:"Se", tn:"s/se (with) always takes the instrumental.", p:"vším ends like tím, the instrumental of ten. The s becomes se because s vším is hard to say."},
+  "Ahoj ___! Jak se máte?": {t:"Ahoj", tn:"a greeting addresses people directly, so it's the vocative.", p:"The plural vocative always looks like the plural nominative."},
+  "Na stole ležely ___ ty staré knihy.": {suf:[["ležely","y","in the past tense signals a feminine (or masculine inanimate) plural subject."],["knihy","y","is the feminine nominative plural ending."]]},
+  "Snědli jsme ___ kapry.": {t:"Snědli", tn:"sníst takes a direct object, so the accusative.", suf:[["kapry","y","marks the masculine animate accusative plural. Animals count as animate."]]},
+  "Mluvili jsme o ___ novinkách v práci.": {t:"o", tn:"o (about) always takes the locative.", suf:[["novinkách","ách","is the locative plural ending for feminine nouns ending in -a."],["práci","i","is locative too, because v describes where (v práci = at work)."]]},
+  "Viděl jsi už ___ ta nová auta?": {t:"Viděl", tn:"vidět takes a direct object, so the accusative.", suf:[["auta","a","is the neuter plural ending, and neuter goes with všechna (and with ta and nová)."]]}
+};
+GRAMMAR.vsechen.cards.forEach(c => Object.assign(c, CLUES[c.q] || {}));
+
+const QUESTIONS = ["", "kdo? co?", "koho? čeho?", "komu? čemu?", "koho? co?", "addressing someone", "o kom? o čem?", "kým? čím?"];
+const PLURAL_ENDINGS = ["",
+  "-i (kamarádi, masculine animate only), -y (knihy, stoly), -e/-ě (kolegyně), -a (auta, neuter)",
+  "-ů (učitelů, studentů), or no ending at all (knih, aut)",
+  "-ům (kamarádům), -ám (knihám), -em/-ím (dětem)",
+  "-y (kamarády, knihy, stoly), -e (herce), -a (auta, neuter)",
+  "same as the nominative",
+  "-ech (problémech), -ách (novinkách), -ích",
+  "-y (kamarády, spolužáky), -ami (knihami), -emi, -mi (dětmi)"
+];
+const VSE_PLURAL = ["", "všichni / všechny / všechna", "všech", "všem", "všechny / všechna", "same as the nominative", "všech", "všemi"];
+
+/* Vocab: [czech, english, optional case note]. Separate accepted translations with "/".
    Text in (parentheses) is shown as a hint but not required. */
 const VOCAB = [
   ["drát","wire"],["obydlí","dwelling"],["dočasný","temporary"],["větev","branch"],
   ["bohoslužba","religious service/church service/mass"],["tvrdit","to assert/to insist/to claim"],
   ["tvrzení","assertion/claim"],["kolísat","to vary/to fluctuate/to oscillate"],["uprchlík","refugee"],
   ["na to, že","given that/considering that/the fact that"],["akorát","just right/only that/just"],
-  ["pochmurný","gloomy/sombre/somber"],["stěžovat si","to complain"],["střecha","roof"],
+  ["pochmurný","gloomy/sombre/somber"],["stěžovat si","to complain","+ na + accusative (na koho? na co?)"],["střecha","roof"],
   ["zasadit","to plant"],["plíseň","mould/mold/fungus"],["žito","rye"],["stodola","barn"],
   ["vůbec netuším","I have no idea/no idea at all/I have no idea at all"],
-  ["souviset s","to be connected to/to be related to/to relate to"],
+  ["souviset s","to be connected to/to be related to/to relate to","+ instrumental (s čím?)"],
   ["sebrat odvahu","to summon courage/to gather courage/to pluck up courage"],
   ["okraj","edge/border/margin"],["útes","cliff/reef"],["opakovat","to repeat/to review"],
   ["dálka","distance (colloquial)"],["vzdálenost","distance (formal)"],["vzdálený","distant/remote/far"],
-  ["oběť","victim/sacrifice"],["potýkat se s","to struggle with/to deal with/to grapple with"],
-  ["bát se o","to worry about (someone)"],["chřest","asparagus"],["plakát","poster"],
+  ["oběť","victim/sacrifice"],["potýkat se s","to struggle with/to deal with/to grapple with","+ instrumental (s čím?)"],
+  ["bát se o","to worry about (someone)","+ accusative (o koho? o co?)"],["chřest","asparagus"],["plakát","poster"],
   ["předválečný","pre-war/prewar"],["pohádka","fairy tale/fairytale"],["Ježibaba","witch (in fairy tales)"],
   ["vlna","wave/wool"],["vlněný","woollen/woolen/wool"],["zvlněný","wavy/rolling/undulating"],
   ["vlnobití","surf/breaking waves"],["vlnolam","breakwater"],
@@ -310,7 +358,7 @@ async function login(name){
 function logout(){ user = null; data = null; S = null; LS.del("lastUser"); renderLogin(); }
 
 /* ===== SPACED REPETITION ===== */
-function vocabList(){ return VOCAB.map(([cz,en]) => ({cz,en})).concat(data.custom); }
+function vocabList(){ return VOCAB.map(([cz,en,g]) => ({cz,en,g})).concat(data.custom); }
 function deckCards(key){
   if(key === "slovicka") return vocabList().map(w => ({ id:"s:"+w.cz, kind:"vocab", ...w }));
   return GRAMMAR[key].cards.map(c => ({ id:"g:"+key+":"+c.q, kind: c.c ? "case" : "text", ...c }));
@@ -403,7 +451,7 @@ function renderHome(){
   const words = vocab.slice().sort((a,b) => level(b.id) - level(a.id) || a.cz.localeCompare(b.cz, "cs"))
     .map(w => {
       const ci = data.custom.findIndex(x => x.cz === w.cz);
-      return `<li><span><b>${esc(w.cz)}</b> <span class="en">${esc(showEn(w.en))}</span></span>
+      return `<li><span><b>${esc(w.cz)}</b> <span class="en">${esc(showEn(w.en))}${w.g ? ` <i>(${esc(w.g)})</i>` : ""}</span></span>
         <span class="btns"><span class="meter" title="${levelName(w.id)}" aria-label="${levelName(w.id)}">${[1,2,3,4,5,6].map(i => `<i class="${level(w.id) >= i ? "on" : ""}"></i>`).join("")}</span>
         ${ci >= 0 ? `<button class="del" data-del="${ci}">Delete</button>` : ""}</span></li>`;
     }).join("");
@@ -446,6 +494,17 @@ function renderHome(){
 
     <h2>Grammar</h2>
     ${grammarPanels}
+    <div class="panel"><details><summary>Case clues: triggers and endings</summary>
+      <p class="sub">Words that always take a certain case, and the plural endings that give each case away.</p>
+      ${[1,2,3,4,5,6,7].map(k => {
+        const trig = GRAMMAR.vazby.cards.filter(c => c.c === k).map(c => c.q)
+          .concat(vocabList().filter(w => w.g && w.g.includes(CASES_EN[k])).map(w => w.cz));
+        return `<div class="cheat"><h3>${cap(CASES_EN[k])} <span class="sub">${k}. pád, ${esc(QUESTIONS[k])}</span></h3>
+          ${trig.length ? `<p><b>Always after:</b> ${esc([...new Set(trig)].join(", "))}</p>` : ""}
+          <p><b>Plural endings:</b> ${esc(PLURAL_ENDINGS[k])}</p>
+          <p><b>všechen in the plural:</b> ${esc(VSE_PLURAL[k])}</p></div>`;
+      }).join("")}
+    </details></div>
 
     ${cloudOn ? "" : `<div class="panel" style="margin-top:24px"><details><summary>Move progress to another device</summary>
       <p class="sub">Copy the backup code, then paste it on the other device while logged in with the same username.</p>
@@ -523,6 +582,31 @@ function check(c, input){
   if(u && alts.map(strip).includes(strip(u))) return "accent";
   return "wrong";
 }
+const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const wordRe = w => new RegExp("(^|[^\\p{L}])(" + reEsc(w) + ")(?=[^\\p{L}]|$)", "u");
+function sentenceHTML(c){
+  let h = esc(c.q).replace("___", "\u0001" + esc(c.a[0]) + "\u0002");
+  if(c.t) h = h.replace(wordRe(c.t), "$1<span class=\"trig\">$2</span>");
+  (c.suf || []).forEach(([w, e]) => {
+    h = h.replace(wordRe(w), (m, pre) => pre + w.slice(0, w.length - e.length) + `<span class="suf">${e}</span>`);
+  });
+  return h.replace("\u0001", "<b>").replace("\u0002", "</b>");
+}
+function cluesHTML(c){
+  const items = [];
+  if(c.kind === "text"){
+    if(c.tn) items.push(`<li><b>Trigger:</b> <span class="trig">${esc(c.t)}</span>: ${esc(c.tn)}</li>`);
+    (c.suf || []).forEach(([w, e, note]) => items.push(`<li><b>Ending:</b> ${esc(w.slice(0, w.length - e.length))}-<span class="suf">${esc(e)}</span> ${esc(note)}</li>`));
+    if(c.p) items.push(`<li><b>Pattern:</b> ${esc(c.p)}</li>`);
+  }else if(c.kind === "case"){
+    if(c.m) items.push(`<li><b>Always:</b> <span class="trig">${esc(c.q)}</span> + ${CASES_EN[c.c]}</li>`);
+    items.push(`<li><b>Plural endings:</b> ${esc(PLURAL_ENDINGS[c.c])}</li>`);
+    items.push(`<li><b>všechen in the plural:</b> ${esc(VSE_PLURAL[c.c])}</li>`);
+  }else if(c.g){
+    items.push(`<li><b>Always:</b> <span class="trig">${esc(c.cz)}</span> ${esc(c.g)}</li>`);
+  }
+  return items.length ? `<ul class="clues">${items.join("")}</ul>` : "";
+}
 function whyHTML(c){
   if(c.kind === "vocab") return "";
   const k = c.kind === "case" ? c.c : c.k;
@@ -534,7 +618,7 @@ function feedbackHTML(c){
   const head = v === "ok" ? "Correct!" : v === "accent" ? "Almost! Watch the accents." : "Not this time.";
   let body = "";
   if(c.kind === "text"){
-    body = `<p class="full">${esc(c.q).replace("___", "<b>" + esc(c.a[0]) + "</b>")}</p>`
+    body = `<p class="full">${sentenceHTML(c)}</p>`
       + `<p>${cap(CASES_EN[c.k])} ${c.n} (${c.k}. pád)</p><p class="tr">${esc(c.en)}</p>`;
   }else if(c.kind === "case"){
     body = `<p><b>${cap(CASES_EN[c.c])}</b> (${c.c}. pád)</p>`
@@ -544,6 +628,7 @@ function feedbackHTML(c){
   }else{
     body = `<p class="full"><b>${esc(c.cz)}</b> = ${esc(showEn(c.en))}</p>`;
   }
+  body += cluesHTML(c);
   const why = whyHTML(c);
   const whyBlock = !why ? "" : v === "wrong"
     ? `<div class="why">${why}</div>`
