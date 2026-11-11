@@ -91,6 +91,18 @@ details summary{cursor:pointer;font-weight:700}
 .clues li{margin:5px 0}
 .cheat{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
 .cheat p{margin:4px 0;font-size:.95rem}
+.retype{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.retype .btns{margin-top:0}
+.retype input{background:var(--surface);font-size:1.1rem}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+@media (max-width:420px){.choices{grid-template-columns:1fr}}
+.choice{display:flex;align-items:center;gap:12px;text-align:left;padding:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;font:700 1.02rem "Atkinson Hyperlegible",sans-serif;cursor:pointer}
+.choice .num{flex:none;width:26px;height:26px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:.85rem;color:var(--muted)}
+.choice .pad{font-weight:400;color:var(--muted);font-size:.9rem}
+.choice.right{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
+.choice.picked{border-color:var(--sign);box-shadow:inset 0 0 0 1px var(--sign)}
+.choice:disabled{cursor:default}
+.choice:disabled:not(.right):not(.picked){opacity:.5}
 .why{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .why summary{font-weight:700;cursor:pointer;font-size:.95rem}
 .login{max-width:420px;margin:10vh auto 0}
@@ -172,18 +184,133 @@ const GRAMMAR = {
     {q:"Mluvili jsme o ___ novinkách v práci.", a:["všech"], k:6, n:"plural", en:"We talked about all the news at work.",
       why:"The preposition o (about) always takes the locative. Novinkách is locative plural, so all becomes všech."},
     {q:"Viděl jsi už ___ ta nová auta?", a:["všechna"], k:4, n:"plural", en:"Have you seen all those new cars yet?",
-      why:"The cars are the direct object (what did you see?), so it's the accusative. Auto is neuter, and the neuter accusative plural is všechna. In casual speech you'll also hear všechny ty nový auta."}
+      why:"The cars are the direct object (what did you see?), so it's the accusative. Auto is neuter, and the neuter accusative plural is všechna. In casual speech you'll also hear všechny ty nový auta."},
+    /* ---- added: every form of všechen ---- */
+    {q:"Kam zmizel ___ cukr?", a:["všechen"], k:1, n:"singular", gd:"masculine inanimate", en:"Where did all the sugar go?",
+      why:"The sugar is the subject (what disappeared?), so it's the nominative. Cukr is masculine, and the masculine nominative singular is všechen.",
+      suf:[["zmizel","l","in the past tense, with no -a or -o after it, signals a masculine singular subject."]]},
+    {q:"___ voda vytekla z vany.", a:["všechna"], k:1, n:"singular", gd:"feminine", en:"All the water drained out of the bathtub.",
+      why:"The water is the subject (what drained out?), so it's the nominative. Voda is feminine, and the feminine nominative singular is všechna.",
+      suf:[["vytekla","a","in the past tense signals a feminine singular subject."]]},
+    {q:"___ je v pořádku.", a:["všechno","vše"], k:1, n:"singular", gd:"neuter", en:"Everything is fine.",
+      why:"Everything is the subject (what is fine?), so it's the nominative. Used on its own, \"everything\" is neuter: všechno (or the more formal vše).",
+      p:"Všechno on its own always means \"everything\". Vše means the same thing but sounds more formal or written."},
+    {q:"Vzdal se ___ majetku.", a:["všeho"], k:2, n:"singular", gd:"masculine inanimate", en:"He gave up all his property.",
+      why:"The verb vzdát se (to give up, to renounce) takes the genitive: vzdát se čeho? Majetku is genitive singular, so všechen becomes všeho.",
+      t:"Vzdal se", tn:"vzdát se (to give up, to renounce) always takes the genitive.",
+      suf:[["majetku","u","is a genitive singular ending for masculine inanimate nouns (majetek → majetku)."]], p:"všeho ends like toho, the genitive of ten. Masculine and neuter share this form."},
+    {q:"Řekl to bez ___ pochybnosti.", a:["vší"], k:2, n:"singular", gd:"feminine", en:"He said it without any doubt.",
+      why:"The preposition bez (without) always takes the genitive. Pochybnosti is feminine genitive singular, and the feminine genitive of všechen is vší.",
+      t:"bez", tn:"bez (without) always takes the genitive.",
+      suf:[["pochybnosti","i","is the genitive singular ending for feminine nouns like pochybnost."]],
+      p:"In the feminine singular, every case except the nominative and accusative is vší. Bez vší pochybnosti is a set phrase meaning \"beyond all doubt\"."},
+    {q:"Navzdory ___ tomu hluku jsem usnula.", a:["všemu"], k:3, n:"singular", gd:"masculine inanimate", en:"Despite all that noise, I fell asleep.",
+      why:"The preposition navzdory (despite) takes the dative. Tomu hluku is dative singular, so všechen becomes všemu.",
+      t:"Navzdory", tn:"navzdory (despite) always takes the dative.",
+      suf:[["hluku","u","is the dative singular ending for masculine inanimate nouns like hluk."]], p:"všemu ends like tomu, right next to it in this sentence. Masculine and neuter share this form."},
+    {q:"Navzdory ___ snaze to nevyšlo.", a:["vší"], k:3, n:"singular", gd:"feminine", en:"Despite all the effort, it didn't work out.",
+      why:"The preposition navzdory (despite) takes the dative. Snaha is feminine, and the feminine dative singular is vší.",
+      t:"Navzdory", tn:"navzdory (despite) always takes the dative.",
+      suf:[["snaze","e","is the dative singular of snaha. The h changes to z before -e."]], p:"In the feminine singular, every case except the nominative and accusative is vší."},
+    {q:"Vypila jsem ___ vodu.", a:["všechnu","vši"], k:4, n:"singular", gd:"feminine", en:"I drank all the water.",
+      why:"The water is the direct object (what did I drink?), so it's the accusative. Voda is feminine, and the feminine accusative singular is všechnu.",
+      t:"Vypila", tn:"vypít takes a direct object, so the accusative.",
+      suf:[["vodu","u","is the feminine accusative singular ending, and všechnu ends the same way."]], p:"Feminine accusative -u shows up everywhere: tu vodu, všechnu vodu. Vši also exists, but it's rare and formal."},
+    {q:"Přemýšlím o ___ tom čase, který jsme ztratili.", a:["všem"], k:6, n:"singular", gd:"masculine inanimate", en:"I'm thinking about all that time we lost.",
+      why:"The preposition o (about) always takes the locative. Tom čase is locative singular, so všechen becomes všem.",
+      t:"o", tn:"o (about) always takes the locative.",
+      suf:[["čase","e","is the locative singular ending for čas."]], p:"všem ends like tom, right next to it. Masculine and neuter share this form."},
+    {q:"Mluvila o ___ té práci, kterou udělala.", a:["vší"], k:6, n:"singular", gd:"feminine", en:"She talked about all the work she did.",
+      why:"The preposition o (about) always takes the locative. Práce is feminine, and the feminine locative singular is vší.",
+      t:"o", tn:"o (about) always takes the locative.",
+      suf:[["práci","i","is the locative singular of práce."]], p:"In the feminine singular, every case except the nominative and accusative is vší."},
+    {q:"Se ___ tím hlukem se nedá spát.", a:["vším"], k:7, n:"singular", gd:"masculine inanimate", en:"You can't sleep with all that noise.",
+      why:"The preposition s/se (with) always takes the instrumental. Tím hlukem is instrumental singular, so všechen becomes vším.",
+      t:"Se", tn:"s/se (with) always takes the instrumental.",
+      suf:[["hlukem","em","is the instrumental singular ending for masculine nouns."]], p:"vším ends like tím, right next to it. Masculine and neuter share this form."},
+    {q:"Se ___ tou prací nemám na nic čas.", a:["vší"], k:7, n:"singular", gd:"feminine", en:"With all that work, I don't have time for anything.",
+      why:"The preposition s/se (with) always takes the instrumental. Prací is feminine instrumental singular, and the feminine form is vší.",
+      t:"Se", tn:"s/se (with) always takes the instrumental.",
+      suf:[["prací","í","is the instrumental singular of práce."]], p:"In the feminine singular, every case except the nominative and accusative is vší."},
+    {q:"___ moji kamarádi mluví česky.", a:["všichni"], k:1, n:"plural", gd:"masculine animate", en:"All my friends speak Czech.",
+      why:"The friends are the subject (who speaks Czech?), so it's the nominative. Kamarád is masculine animate, the only gender that uses všichni.",
+      suf:[["kamarádi","i","is the masculine animate nominative plural ending. Moji ends in -i to match."]]},
+    {q:"___ stoly v restauraci jsou obsazené.", a:["všechny"], k:1, n:"plural", gd:"masculine inanimate", en:"All the tables in the restaurant are taken.",
+      why:"The tables are the subject (what is taken?), so it's the nominative. Stůl is masculine inanimate. Only masculine animate nouns use všichni, so this is všechny.",
+      suf:[["stoly","y","is the nominative plural ending for hard masculine inanimate nouns."]], p:"Masculine inanimate plurals behave like feminine ones: všechny stoly, všechny knihy."},
+    {q:"___ okna jsou otevřená.", a:["všechna"], k:1, n:"plural", gd:"neuter", en:"All the windows are open.",
+      why:"The windows are the subject (what is open?), so it's the nominative. Okno is neuter, and the neuter nominative plural is všechna.",
+      suf:[["okna","a","is the neuter plural ending, and všechna ends the same way."],["otevřená","á","on the adjective also signals a neuter plural."]]},
+    {q:"Bez ___ těch papírů nemůžu nic udělat.", a:["všech"], k:2, n:"plural", gd:"masculine inanimate", en:"I can't do anything without all those papers.",
+      why:"The preposition bez (without) always takes the genitive. Papírů is genitive plural, so všechen becomes všech.",
+      t:"Bez", tn:"bez (without) always takes the genitive.",
+      suf:[["papírů","ů","is the genitive plural ending for masculine nouns."]], p:"všech ends like těch. In the genitive plural, every gender uses všech."},
+    {q:"Znám jména ___ ulic v Praze.", a:["všech"], k:2, n:"plural", gd:"feminine", en:"I know the names of all the streets in Prague.",
+      why:"\"The names of\" is an \"of\" relationship, which is the genitive. Ulic is feminine genitive plural, so all becomes všech.",
+      t:"jména", tn:"\"the names of\" puts the next noun in the genitive.",
+      p:"Many feminine nouns have no ending in the genitive plural (ulice → ulic, kniha → knih). všech shows you the case even when the noun doesn't."},
+    {q:"Ztratila jsem klíče od ___ aut.", a:["všech"], k:2, n:"plural", gd:"neuter", en:"I lost the keys to all the cars.",
+      why:"The preposition od (from, of) always takes the genitive. Aut is neuter genitive plural, so all becomes všech.",
+      t:"od", tn:"od (from) always takes the genitive.",
+      p:"Neuter nouns often have no ending in the genitive plural: auto → aut, okno → oken."},
+    {q:"Poděkovala ___ kolegům.", a:["všem"], k:3, n:"plural", gd:"masculine animate", en:"She thanked all her colleagues.",
+      why:"In Czech you give thanks to someone, so poděkovat takes the dative: poděkovat komu? Kolegům is dative plural, so all becomes všem.",
+      t:"Poděkovala", tn:"poděkovat (to thank) always takes the dative.",
+      suf:[["kolegům","ům","is the dative plural ending for masculine nouns."]]},
+    {q:"Napsala jsem ___ kamarádkám.", a:["všem"], k:3, n:"plural", gd:"feminine", en:"I wrote to all my (female) friends.",
+      why:"The friends are receiving the message (to whom?), so it's the dative. Kamarádkám is dative plural, so all becomes všem.",
+      t:"Napsala", tn:"napsat komu? The person you write to is in the dative.",
+      suf:[["kamarádkám","ám","is the dative plural ending for feminine nouns ending in -a."]]},
+    {q:"Rozumím ___ slovům v textu.", a:["všem"], k:3, n:"plural", gd:"neuter", en:"I understand all the words in the text.",
+      why:"The verb rozumět always takes the dative. Slovům is dative plural, so all becomes všem.",
+      t:"Rozumím", tn:"rozumět always takes the dative.",
+      suf:[["slovům","ům","is the dative plural ending for neuter nouns like slovo."]], p:"In the dative plural, every gender uses všem."},
+    {q:"Navzdory ___ problémům jsme to dokončili.", a:["všem"], k:3, n:"plural", gd:"masculine inanimate", en:"Despite all the problems, we finished it.",
+      why:"The preposition navzdory (despite) takes the dative. Problémům is dative plural, so all becomes všem.",
+      t:"Navzdory", tn:"navzdory (despite) always takes the dative.",
+      suf:[["problémům","ům","is the dative plural ending for masculine nouns."]]},
+    {q:"Opravil ___ stoly v kuchyni.", a:["všechny"], k:4, n:"plural", gd:"masculine inanimate", en:"He fixed all the tables in the kitchen.",
+      why:"The tables are the direct object (what did he fix?), so it's the accusative. The masculine inanimate accusative plural is všechny.",
+      t:"Opravil", tn:"opravit takes a direct object, so the accusative.",
+      suf:[["stoly","y","looks the same in the nominative and accusative plural for masculine inanimate nouns."]]},
+    {q:"Snědl jsem ___ koláče.", a:["všechny"], k:4, n:"plural", gd:"masculine inanimate", en:"I ate all the pastries.",
+      why:"The pastries are the direct object (what did I eat?), so it's the accusative. Koláč is masculine inanimate, so its accusative plural uses všechny.",
+      t:"Snědl", tn:"sníst takes a direct object, so the accusative.",
+      suf:[["koláče","e","is the plural ending for soft masculine nouns like koláč."]]},
+    {q:"Pamatuji si ___ ty holky ze školy.", a:["všechny"], k:4, n:"plural", gd:"feminine", en:"I remember all those girls from school.",
+      why:"The girls are the direct object (whom do I remember?), so it's the accusative. Holka is feminine, and the feminine accusative plural is všechny.",
+      t:"Pamatuji si", tn:"pamatovat si takes a direct object, so the accusative.",
+      suf:[["holky","y","is the feminine accusative plural ending."]]},
+    {q:"Mluvili jsme o ___ studentech.", a:["všech"], k:6, n:"plural", gd:"masculine animate", en:"We talked about all the students.",
+      why:"The preposition o (about) always takes the locative. Studentech is locative plural, so all becomes všech.",
+      t:"o", tn:"o (about) always takes the locative.",
+      suf:[["studentech","ech","is the locative plural ending for masculine nouns."]],
+      p:"všech is both the genitive and the locative plural. The preposition tells you which: bez všech (genitive), o všech (locative)."},
+    {q:"Ve ___ městech, kde jsem byla, jezdily tramvaje.", a:["všech"], k:6, n:"plural", gd:"neuter", en:"In all the cities I've been to, there were trams.",
+      why:"v/ve (in) describing where something is takes the locative. Městech is locative plural, so all becomes všech.",
+      t:"Ve", tn:"v/ve (in) for location (kde?) always takes the locative.",
+      suf:[["městech","ech","is the locative plural ending for neuter nouns like město."]], p:"v becomes ve before some consonant clusters, as in ve všech."},
+    {q:"Šla jsem do kina se ___ kamarádkami.", a:["všemi"], k:7, n:"plural", gd:"feminine", en:"I went to the cinema with all my (female) friends.",
+      why:"The preposition s/se (with) always takes the instrumental. Kamarádkami is instrumental plural, so all becomes všemi.",
+      t:"se", tn:"s/se (with) always takes the instrumental.",
+      suf:[["kamarádkami","ami","is the instrumental plural ending for feminine nouns ending in -a."]]},
+    {q:"Před ___ domy stála auta.", a:["všemi"], k:7, n:"plural", gd:"masculine inanimate", en:"Cars were parked in front of all the houses.",
+      why:"The preposition před (in front of) takes the instrumental when it describes where something is. Domy is instrumental plural, so all becomes všemi.",
+      t:"Před", tn:"před (in front of) describing where takes the instrumental.",
+      suf:[["domy","y","is the instrumental plural ending for hard masculine nouns."]]},
+    {q:"Mám problém se ___ těmi novými slovy.", a:["všemi"], k:7, n:"plural", gd:"neuter", en:"I have trouble with all those new words.",
+      why:"The preposition s/se (with) always takes the instrumental. Slovy is neuter instrumental plural, so all becomes všemi.",
+      t:"se", tn:"s/se (with) always takes the instrumental.",
+      suf:[["slovy","y","is the instrumental plural ending for neuter nouns like slovo."]], p:"všemi ends like těmi. In the instrumental plural, every gender uses všemi."}
   ]},
-  pady: { name: "Pády (cases)", desc: "Which case? Type the number or the name.", cards: [
+  pady: { name: "Cases, prepositions and verbs", desc: "Which case?", cards: [
     {q:"kdo? co?", c:1, en:"who? what?"},
     {q:"koho? čeho?", c:2, en:"of whom? of what?"},
     {q:"komu? čemu?", c:3, en:"to whom? to what?"},
     {q:"koho? co?", c:4, en:"whom? what?"},
     {q:"Ahoj, Petře! Mami!", c:5, en:"Hi, Petr! Mum!"},
     {q:"o kom? o čem?", c:6, en:"about whom? about what?"},
-    {q:"kým? čím?", c:7, en:"with whom? with what?"}
-  ]},
-  vazby: { name: "Prepositions and verbs", desc: "Which case follows? Type the number or the name.", cards: [
+    {q:"kým? čím?", c:7, en:"with whom? with what?"},
     {q:"s / se", c:7, m:"with", ex:"Mluvil jsem se všemi kamarády.", en:"I talked with all my friends."},
     {q:"o", c:6, m:"about", ex:"Mluvíme o všem.", en:"We talk about everything."},
     {q:"v / na (kde?)", c:6, m:"in, at (location)", ex:"Jsem na poště.", en:"I'm at the post office.",
@@ -237,7 +364,16 @@ const CLUES = {
   "Mluvili jsme o ___ novinkách v práci.": {t:"o", tn:"o (about) always takes the locative.", suf:[["novinkách","ách","is the locative plural ending for feminine nouns ending in -a."],["práci","i","is locative too, because v describes where (v práci = at work)."]]},
   "Viděl jsi už ___ ta nová auta?": {t:"Viděl", tn:"vidět takes a direct object, so the accusative.", suf:[["auta","a","is the neuter plural ending, and neuter goes with všechna (and with ta and nová)."]]}
 };
-GRAMMAR.vsechen.cards.forEach(c => Object.assign(c, CLUES[c.q] || {}));
+const GENDERS = {
+  "S tebou můžu mluvit o ___.":"neuter", "Ptal jsem se na to ___ učitelů.":"masculine animate", "Znám ___ herce z divadla.":"masculine animate",
+  "Napsal jsem jména ___ studentů.":"masculine animate", "Pracovaly na tom ___ kolegyně.":"feminine", "Znám ___ auta.":"neuter",
+  "Potřebuju ___ kamarády.":"masculine animate", "Mluvil jsem se ___ kamarády.":"masculine animate", "Přišli ___ kamarádi.":"masculine animate",
+  "Na výlet půjdeme se ___ spolužáky.":"masculine animate", "Bojí se úplně ___.":"neuter", "Mluvíme spolu o ___ problémech.":"masculine inanimate",
+  "Už jsme viděli ___ památky.":"feminine", "___ jsem už zapomněl.":"neuter", "Rozumíš ___?":"neuter", "Vypil jsi ___ čaj?":"masculine inanimate",
+  "Se ___ ti rád pomůžu.":"neuter", "Ahoj ___! Jak se máte?":"masculine animate", "Na stole ležely ___ ty staré knihy.":"feminine",
+  "Snědli jsme ___ kapry.":"masculine animate", "Mluvili jsme o ___ novinkách v práci.":"feminine", "Viděl jsi už ___ ta nová auta?":"neuter"
+};
+GRAMMAR.vsechen.cards.forEach(c => { Object.assign(c, CLUES[c.q] || {}); if(!c.gd && GENDERS[c.q]) c.gd = GENDERS[c.q]; });
 
 const QUESTIONS = ["", "kdo? co?", "koho? čeho?", "komu? čemu?", "koho? co?", "addressing someone", "o kom? o čem?", "kým? čím?"];
 const PLURAL_ENDINGS = ["",
@@ -361,7 +497,7 @@ function logout(){ user = null; data = null; S = null; LS.del("lastUser"); rende
 function vocabList(){ return VOCAB.map(([cz,en,g]) => ({cz,en,g})).concat(data.custom); }
 function deckCards(key){
   if(key === "slovicka") return vocabList().map(w => ({ id:"s:"+w.cz, kind:"vocab", ...w }));
-  return GRAMMAR[key].cards.map(c => ({ id:"g:"+key+":"+c.q, kind: c.c ? "case" : "text", ...c }));
+  return GRAMMAR[key].cards.map(c => ({ id:"g:" + (key === "pady" && c.m ? "vazby" : key) + ":" + c.q, kind: c.c ? "case" : "text", ...c }));
 }
 const rec = id => data.cards[id];
 const isDue = id => { const r = rec(id); return !!r && r.d <= today(); };
@@ -497,7 +633,7 @@ function renderHome(){
     <div class="panel"><details><summary>Case clues: triggers and endings</summary>
       <p class="sub">Words that always take a certain case, and the plural endings that give each case away.</p>
       ${[1,2,3,4,5,6,7].map(k => {
-        const trig = GRAMMAR.vazby.cards.filter(c => c.c === k).map(c => c.q)
+        const trig = GRAMMAR.pady.cards.filter(c => c.m && c.c === k).map(c => c.q)
           .concat(vocabList().filter(w => w.g && w.g.includes(CASES_EN[k])).map(w => w.cz));
         return `<div class="cheat"><h3>${cap(CASES_EN[k])} <span class="sub">${k}. pád, ${esc(QUESTIONS[k])}</span></h3>
           ${trig.length ? `<p><b>Always after:</b> ${esc([...new Set(trig)].join(", "))}</p>` : ""}
@@ -559,7 +695,9 @@ function startSession(key, all){
 function nextCard(){
   if(!S.queue.length) return renderDone();
   const c = S.queue[0];
-  S.answered = false; S.verdict = null; S.input = "";
+  S.answered = false; S.verdict = null; S.input = ""; S.pick = null; S.opts = null;
+  const size = mcSize(c);
+  if(size) S.opts = shuffle([c.c, ...shuffle([1,2,3,4,5,6,7].filter(x => x !== c.c)).slice(0, size - 1)]);
   if(c.kind === "vocab") S.ask = data.dir === "mix" ? (Math.random() < .5 ? "cz" : "en") : (data.dir === "cz2en" ? "en" : "cz");
   renderSession();
 }
@@ -585,7 +723,7 @@ function check(c, input){
 const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const wordRe = w => new RegExp("(^|[^\\p{L}])(" + reEsc(w) + ")(?=[^\\p{L}]|$)", "u");
 function sentenceHTML(c){
-  let h = esc(c.q).replace("___", "\u0001" + esc(c.a[0]) + "\u0002");
+  let h = esc(c.q).replace("___", "\u0001" + esc(c.q.startsWith("___") ? cap(c.a[0]) : c.a[0]) + "\u0002");
   if(c.t) h = h.replace(wordRe(c.t), "$1<span class=\"trig\">$2</span>");
   (c.suf || []).forEach(([w, e]) => {
     h = h.replace(wordRe(w), (m, pre) => pre + w.slice(0, w.length - e.length) + `<span class="suf">${e}</span>`);
@@ -613,13 +751,15 @@ function whyHTML(c){
   const reason = c.why || (c.m ? `${c.q} (${c.m}) is always followed by the ${CASES_EN[k]}.` : "");
   return `${reason ? `<p><b>Why the ${CASES_EN[k]}?</b> ${esc(reason)}</p>` : ""}<p class="sub">${esc(CASE_INFO[k])}</p>`;
 }
+const keysHTML = target => `<div class="keys" data-for="${target}">${"áčďéěíňóřšťúůýž".split("").map(ch => `<button type="button" data-ch="${ch}">${ch}</button>`).join("")}</div>`;
+const needsCzech = c => c.kind === "text" || (c.kind === "vocab" && S.ask === "cz");
 function feedbackHTML(c){
   const v = S.verdict;
   const head = v === "ok" ? "Correct!" : v === "accent" ? "Almost! Watch the accents." : "Not this time.";
   let body = "";
   if(c.kind === "text"){
     body = `<p class="full">${sentenceHTML(c)}</p>`
-      + `<p>${cap(CASES_EN[c.k])} ${c.n} (${c.k}. pád)</p><p class="tr">${esc(c.en)}</p>`;
+      + `<p>${cap(CASES_EN[c.k])} ${c.n}${c.gd ? ", " + c.gd : ""} (${c.k}. pád)</p><p class="tr">${esc(c.en)}</p>`;
   }else if(c.kind === "case"){
     body = `<p><b>${cap(CASES_EN[c.c])}</b> (${c.c}. pád)</p>`
       + (c.m ? `<p>${esc(c.q)} = ${esc(c.m)}</p>` : "")
@@ -635,50 +775,99 @@ function feedbackHTML(c){
     : `<details class="why"><summary>Why?</summary>${why}</details>`;
   const yours = v !== "ok" && S.input.trim() ? `<p class="sub">Your answer: ${esc(S.input)}</p>` : "";
   return `<div class="fb ${v}" role="status"><p class="verdict">${head}</p>${body}${whyBlock}${yours}
-    <div class="btns">${v === "wrong" ? `<button class="btn ghost" id="override" type="button">I was right</button>` : ""}
-    <button class="btn" id="next" type="button">Next</button></div></div>`;
+    ${v === "wrong" ? `<form id="rf" class="retype">
+      <label>${S.opts ? "Type the correct case (number or name) to continue" : "Type the correct answer to continue"}
+        <input id="re" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Correct answer"></label>
+      ${needsCzech(c) ? keysHTML("re") : ""}
+      <p id="reMsg" class="err" role="status"></p>
+      <div class="btns"><button class="btn ghost" id="override" type="button" ${S.opts ? "hidden" : ""}>I was right</button>
+        <button class="btn" type="submit">Next</button></div></form>`
+    : `<div class="btns"><button class="btn" id="next" type="button">Next</button></div>`}</div>`;
 }
+function mcSize(c){
+  if(c.kind !== "case") return 0;
+  const n = (rec(c.id) || {}).c || 0;
+  return n < 5 ? 4 : n < 8 ? 3 : 0;
+}
+const caseLabel = n => `${cap(CASES_EN[n])} (${n}. pád)`;
 function renderSession(){
   const c = S.queue[0];
   let big, label;
   if(c.kind === "vocab"){ big = S.ask === "cz" ? showEn(c.en) : c.cz; label = S.ask === "cz" ? "Type it in Czech" : "Type it in English"; }
+  else if(c.kind === "case"){ big = c.q; label = (c.m ? "Which case follows this?" : "Which case answers these questions?") + (S.opts ? "" : " Type the number or the name."); }
   else { big = c.q; label = GRAMMAR[S.key].desc; }
-  const needsCz = c.kind === "text" || (c.kind === "vocab" && S.ask === "cz");
+  const needsCz = needsCzech(c);
+  let area;
+  if(S.opts){
+    const n = (rec(c.id) || {}).c || 0;
+    const note = S.opts.length === 4 ? `${5 - n} more correct to go down to 3 options.` : `${8 - n} more correct until you type the answer yourself.`;
+    area = `<div class="choices" role="group" aria-label="Choose the case">${S.opts.map((o, i) => {
+        const cls = !S.answered ? "" : o === c.c ? "right" : o === S.pick ? "picked" : "";
+        return `<button type="button" class="choice ${cls}" data-pick="${o}" ${S.answered ? "disabled" : ""}><span class="num">${i + 1}</span><span>${cap(CASES_EN[o])} <span class="pad">${o}. pád</span></span></button>`;
+      }).join("")}</div>
+      <p class="sub" style="margin-top:8px">${S.answered ? "" : note}</p>`;
+  }else{
+    area = `<form class="answer" id="af">
+      <input id="ans" aria-label="Your answer" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
+        placeholder="Your answer" value="${esc(S.input)}" ${S.answered ? "readonly" : ""}>
+      ${needsCz && !S.answered ? keysHTML("ans") : ""}
+      ${S.answered ? "" : `<button class="btn" type="submit">Check</button>`}
+    </form>`;
+  }
   app.innerHTML = `
     <div class="sesshead"><button class="link" id="quit" type="button">Back to overview</button>
       <span class="sub">${S.done} / ${S.total}</span></div>
     <div class="bar"><span style="width:${S.done / S.total * 100}%"></span></div>
     <div class="sign"><div class="inner"><div class="big">${esc(big)}</div><div class="label">${esc(label)}</div></div></div>
-    <form class="answer" id="af">
-      <input id="ans" aria-label="Your answer" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
-        placeholder="Your answer" value="${esc(S.input)}" ${S.answered ? "readonly" : ""}>
-      ${needsCz && !S.answered ? `<div class="keys">${"áčďéěíňóřšťúůýž".split("").map(ch => `<button type="button" data-ch="${ch}">${ch}</button>`).join("")}</div>` : ""}
-      ${S.answered ? "" : `<button class="btn" type="submit">Check</button>`}
-    </form>
+    ${area}
     ${S.answered ? feedbackHTML(c) : ""}`;
   $("quit").onclick = renderHome;
-  if(!S.answered){
-    const inp = $("ans");
-    app.querySelectorAll("[data-ch]").forEach(b => {
-      b.onmousedown = e => e.preventDefault();
-      b.onclick = () => {
-        const s = inp.selectionStart ?? inp.value.length, e2 = inp.selectionEnd ?? s;
-        inp.value = inp.value.slice(0, s) + b.dataset.ch + inp.value.slice(e2);
-        inp.focus(); inp.setSelectionRange(s + 1, s + 1);
-      };
-    });
-    $("af").onsubmit = e => {
-      e.preventDefault();
-      S.input = inp.value; S.verdict = check(c, S.input); S.answered = true;
-      renderSession();
+  app.querySelectorAll("[data-ch]").forEach(b => {
+    const inp = $(b.closest(".keys").dataset.for);
+    b.onmousedown = e => e.preventDefault();
+    b.onclick = () => {
+      const s = inp.selectionStart ?? inp.value.length, e2 = inp.selectionEnd ?? s;
+      inp.value = inp.value.slice(0, s) + b.dataset.ch + inp.value.slice(e2);
+      inp.focus(); inp.setSelectionRange(s + 1, s + 1);
     };
-    inp.focus();
+  });
+  if(!S.answered){
+    if(S.opts){
+      app.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => {
+        S.pick = +b.dataset.pick; S.input = caseLabel(S.pick);
+        S.verdict = S.pick === c.c ? "ok" : "wrong"; S.answered = true;
+        renderSession();
+      });
+      app.querySelector("[data-pick]").focus();
+    }else{
+      const inp = $("ans");
+      $("af").onsubmit = e => {
+        e.preventDefault();
+        S.input = inp.value; S.verdict = check(c, S.input); S.answered = true;
+        renderSession();
+      };
+      inp.focus();
+    }
   }else{
-    $("next").onclick = () => commit(S.verdict !== "wrong");
-    if($("override")) $("override").onclick = () => commit(true);
-    $("next").focus();
+    if(S.verdict === "wrong"){
+      $("override").onclick = () => commit(true);
+      $("rf").onsubmit = e => {
+        e.preventDefault();
+        if(check(c, $("re").value) === "ok") commit(false);
+        else { $("reMsg").textContent = "Not quite. Copy the correct answer exactly, including accents."; $("re").focus(); }
+      };
+      $("re").focus();
+    }else{
+      $("next").onclick = () => commit(true);
+      $("next").focus();
+    }
   }
 }
+document.addEventListener("keydown", e => {
+  if(!S || !S.opts || S.answered || e.target.matches("input,textarea")) return;
+  const b = app.querySelectorAll("[data-pick]")[+e.key - 1];
+  if(/^[1-4]$/.test(e.key) && b) b.click();
+});
 function commit(correct){
   const c = S.queue.shift();
   grade(c, correct, S.key);
