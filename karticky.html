@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kartičky – čeština</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9ECEF; --surface:#FFFFFF; --ink:#1C2430; --muted:#5B6675;
+  --sign:#A8232A; --sign-ink:#FFFFFF; --back:#1F3D7A; --line:#CDD3DA;
+  --ok:#2F6B45; --again:#8A5A12;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14181D; --surface:#1E242C; --ink:#E6EAEE; --muted:#9AA5B1;
+    --sign:#B8333A; --back:#2C4F94; --line:#333C47; --ok:#5FA77A; --again:#D4A04E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14181D; --surface:#1E242C; --ink:#E6EAEE; --muted:#9AA5B1;
+  --sign:#B8333A; --back:#2C4F94; --line:#333C47; --ok:#5FA77A; --again:#D4A04E;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:620px;margin:0 auto;padding:20px 18px 40px}
+h1{font:600 1.6rem/1.2 "Literata",Georgia,serif;margin:4px 0 14px}
+.decks{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
+.decks button{flex:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:.95rem;padding:7px 14px;border-radius:999px;cursor:pointer}
+.decks button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.92rem;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.meta button{border:none;background:none;color:var(--muted);font:inherit;text-decoration:underline;cursor:pointer;padding:4px}
+.bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.bar span{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+
+/* the card: a Prague enamel street sign */
+.card{position:relative;width:100%;min-height:250px;perspective:1200px;cursor:pointer;border:none;background:none;padding:0;font:inherit;color:inherit;display:block}
+.face{position:absolute;inset:0;border-radius:14px;padding:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .45s cubic-bezier(.2,.7,.2,1);box-shadow:0 2px 0 rgba(0,0,0,.18),0 10px 24px -12px rgba(0,0,0,.35)}
+.face .inner{height:100%;border:3px solid rgba(255,255,255,.92);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px 18px;gap:10px}
+.front{background:var(--sign);color:var(--sign-ink)}
+.back{background:var(--back);color:#fff;transform:rotateY(180deg)}
+.card.flipped .front{transform:rotateY(-180deg)}
+.card.flipped .back{transform:rotateY(0)}
+.big{font:600 1.55rem/1.3 "Literata",Georgia,serif}
+.small{font-size:1rem;opacity:.9;line-height:1.45;white-space:pre-line}
+.hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:.85rem;opacity:.75}
+.sizer{visibility:hidden;padding:42px 36px;text-align:center}
+.sizer .big{display:block;margin-bottom:10px}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.actions button{font:700 1rem "Atkinson Hyperlegible",sans-serif;padding:14px;border-radius:10px;border:2px solid;cursor:pointer;background:var(--surface)}
+#again{color:var(--again);border-color:var(--again)}
+#got{color:#fff;background:var(--ok);border-color:var(--ok)}
+.actions button:disabled{opacity:.4;cursor:default}
+.keys{color:var(--muted);font-size:.82rem;text-align:center;margin-top:10px}
+
+.done{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:30px 20px;text-align:center}
+.done p{margin:0 0 14px}
+.btn{font:700 1rem "Atkinson Hyperlegible",sans-serif;padding:11px 18px;border-radius:10px;border:none;background:var(--ink);color:var(--bg);cursor:pointer}
+
+details{margin-top:28px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px 16px}
+summary{cursor:pointer;font-weight:700}
+form{display:grid;gap:10px;margin-top:12px}
+label{font-size:.9rem;color:var(--muted);display:grid;gap:4px}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+textarea{min-height:60px;resize:vertical}
+.mine{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:6px}
+.mine li{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:6px;font-size:.95rem}
+.mine button{border:none;background:none;color:var(--sign);cursor:pointer;font:inherit}
+.note{color:var(--muted);font-size:.85rem;margin:8px 0 0}
+:focus-visible{outline:3px solid var(--back);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.face,.bar span{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Kartičky</h1>
+  <nav class="decks" id="decks" aria-label="Balíčky"></nav>
+  <div class="meta">
+    <span id="count"></span>
+    <span><button id="dir" type="button"></button><button id="shuffle" type="button">Začít znovu</button></span>
+  </div>
+  <div class="bar"><span id="bar"></span></div>
+  <div id="stage"></div>
+  <p class="keys">Mezerník = otočit · 1 = ještě jednou · 2 = umím</p>
+
+  <details id="addBox">
+    <summary>Přidat vlastní kartičky</summary>
+    <form id="addForm">
+      <label>Přední strana<input id="fFront" required placeholder="např. stodola"></label>
+      <label>Zadní strana<textarea id="fBack" required placeholder="např. barn"></textarea></label>
+      <button class="btn" type="submit">Přidat kartičku</button>
+    </form>
+    <p class="note">Vlastní kartičky se ukládají v tomto prohlížeči, na tomto zařízení.</p>
+    <ul class="mine" id="mineList"></ul>
+  </details>
+
+  <details>
+    <summary>Přenést pokrok na jiné zařízení</summary>
+    <p class="note">Zkopírujte kód zálohy a vložte ho na druhém zařízení. Přenese se pokrok i vlastní kartičky.</p>
+    <button class="btn" type="button" id="exportBtn" style="margin-top:10px">Zkopírovat kód zálohy</button>
+    <form id="importForm">
+      <label>Kód zálohy<textarea id="importCode"></textarea></label>
+      <button class="btn" type="submit">Načíst zálohu</button>
+    </form>
+    <p class="note" id="backupMsg" role="status"></p>
+  </details>
+</main>
+
+<script>
+const DECKS = {
+  vsechen: { name:"Všechen", cards:[
+    ["S tebou můžu mluvit o ___.","o všem\nlokál, 6. pád (o čem?)"],
+    ["Ptal jsem se na to ___ učitelů.","všech\ngenitiv pl., 2. pád (koho?)"],
+    ["Znám ___ herce z divadla.","všechny\nakuzativ pl., 4. pád (koho?)"],
+    ["Rozdal dárky ___ dětem.","všem\ndativ pl., 3. pád (komu?)"],
+    ["Napsal jsem jména ___ studentů.","všech\ngenitiv pl., 2. pád (koho?)"],
+    ["Pracovaly na tom ___ kolegyně.","všechny\nnominativ pl., 1. pád (kdo?)"],
+    ["Znám ___ auta.","všechna\nakuzativ pl., 4. pád (co?)"],
+    ["Potřebuju ___ kamarády.","všechny\nakuzativ pl., 4. pád (koho?)"],
+    ["Mluvil jsem se ___ kamarády.","všemi\ninstrumentál pl., 7. pád (s kým?)"],
+    ["Přišli ___ kamarádi.","všichni\nnominativ pl., 1. pád (kdo?)"],
+    ["Na výlet půjdeme se ___ spolužáky.","všemi\ninstrumentál pl., 7. pád (s kým?)"],
+    ["Bojí se úplně ___.","všeho\ngenitiv sg., 2. pád (čeho?)"],
+    ["Mluvíme spolu o ___ problémech.","všech\nlokál pl., 6. pád (o čem?)"],
+    ["Už jsme viděli ___ památky.","všechny\nakuzativ pl., 4. pád (co?)"],
+    ["___ jsem už zapomněl.","Všechno\nakuzativ sg., 4. pád (co?)"],
+    ["Rozumíš ___? Ano, rozumím ___.","všemu, všemu\ndativ sg., 3. pád (čemu?)"],
+    ["Vypil jsi ___ čaj?","všechen\nakuzativ sg., 4. pád (co?)"],
+    ["S ___ ti rád pomůžu.","vším\ninstrumentál sg., 7. pád (s čím?)"],
+    ["Ahoj ___! Jak se máte?","všichni\nvokativ pl. (= nominativ)"],
+    ["Na stole ležely ___ ty staré knihy.","všechny\nnominativ pl., ženský rod"],
+    ["Snědli jsme ___ kapry.","všechny\nakuzativ pl., 4. pád\nkapr je životný, i když je mrtvý"]
+  ]},
+  pady: { name:"Pády", cards:[
+    ["1. pád","Nominative\nkdo? co?\nthe subject"],
+    ["2. pád","Genitive\nkoho? čeho?\nof; after bát se, ptát se, bez, z, do"],
+    ["3. pád","Dative\nkomu? čemu?\nto / for someone (recipient)"],
+    ["4. pád","Accusative\nkoho? co?\nthe direct object"],
+    ["5. pád","Vocative\ncalling someone directly\n(plural = same as 1. pád)"],
+    ["6. pád","Locative\no kom? o čem?\nonly after v, na, o, po, při"],
+    ["7. pád","Instrumental\nkým? čím?\nwith / by means of; after s, se"]
+  ]},
+  vazby: { name:"Předložky a slovesa", cards:[
+    ["s / se (with)","instrumentál, 7. pád\nmluvit s kým?"],
+    ["o (about)","lokál, 6. pád\nmluvit o čem?"],
+    ["v / na – kde? (where)","lokál, 6. pád\njsem na poště"],
+    ["v / na – kam? (where to)","akuzativ, 4. pád\njdu na poštu"],
+    ["pro (for)","akuzativ, 4. pád\npro všechny"],
+    ["bát se","genitiv, 2. pád\nbojím se čeho?"],
+    ["ptát se","genitiv, 2. pád\nptám se koho?"],
+    ["všimnout si","genitiv, 2. pád\nvšiml jsem si čeho?"],
+    ["zúčastnit se","genitiv, 2. pád\nčeho?"],
+    ["rozumět","dativ, 3. pád\nrozumím komu? čemu?"],
+    ["pomoct","dativ, 3. pád\npomůžu komu?"],
+    ["říct","dativ (komu?) + akuzativ (co?)\nřekl jsem to všem"],
+    ["zabývat se","instrumentál, 7. pád\nčím?"],
+    ["souviset s","instrumentál, 7. pád\nsouvisí s čím?"],
+    ["potýkat se s","instrumentál, 7. pád\npotýkám se s čím?"],
+    ["bát se o","akuzativ, 4. pád\nbojím se o tebe = I worry about you"]
+  ]},
+  slovicka: { name:"Slovíčka", cards:[
+    ["drát","wire"],["obydlí","dwelling"],["dočasný","temporary"],
+    ["větev (pl. větve)","branch"],["bohoslužba","religious service"],
+    ["tvrdit","to assert, insist"],["tvrzení","assertion"],
+    ["kolísat","to vary, fluctuate"],["uprchlík","refugee"],
+    ["na to, že","given the fact that"],["akorát","1. only that\n2. just right"],
+    ["pochmurný","gloomy, sombre"],["stěžovat si","to complain"],
+    ["střecha","roof"],["zasadit","to plant"],["plíseň","mould, fungus"],
+    ["žito","rye"],["stodola","barn"],
+    ["vůbec netuším","I have no idea at all"],
+    ["souviset s","to be connected / related to"],
+    ["sebrat odvahu","to summon courage"],
+    ["okraj","edge, border\nokraj společnosti, okraj útesu"],
+    ["útes","cliff"],["opakovat","to repeat, review"],
+    ["dálka","distance (colloquial)"],["vzdálenost","distance (formal)"],
+    ["vzdálený","distant"],["oběť","victim\n(not oběd = lunch)"],
+    ["potýkat se s","to struggle / deal with"],
+    ["bát se o někoho","to worry about someone"],
+    ["chřest","asparagus"],["plakát","poster"],
+    ["předválečný","pre-war"],["pohádka","fairy tale"],
+    ["Ježibaba","witch (in fairy tales)"]
+  ]},
+  moje: { name:"Moje", cards:[] }
+};
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+DECKS.moje.cards = store.get("myCards",[]);
+
+let deckKey = store.get("deck","vsechen");
+if(!DECKS[deckKey]) deckKey="vsechen";
+let reversed = false, queue = [], total = 0, flipped = false;
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function progKey(){ return "prog:"+deckKey+":"+(reversed?"r":"f"); }
+function saveProg(){ store.set(progKey(),{queue,total,n:DECKS[deckKey].cards.length}); }
+function start(fresh=true){
+  const n = DECKS[deckKey].cards.length;
+  const saved = fresh ? null : store.get(progKey(),null);
+  if(saved && saved.n===n && Array.isArray(saved.queue) && saved.queue.every(i=>i>=0&&i<n)){
+    queue = saved.queue; total = saved.total;
+  } else {
+    queue = shuffle(DECKS[deckKey].cards.map((c,i)=>i)); total = queue.length;
+  }
+  flipped=false; saveProg(); render();
+}
+
+function renderDecks(){
+  $("decks").innerHTML="";
+  for(const [k,d] of Object.entries(DECKS)){
+    const b=document.createElement("button");
+    b.type="button"; b.textContent=d.name+" ("+d.cards.length+")";
+    b.setAttribute("aria-pressed", k===deckKey);
+    b.onclick=()=>{ deckKey=k; store.set("deck",k); renderDecks(); start(false); };
+    $("decks").appendChild(b);
+  }
+  $("dir").textContent = reversed ? "Zadní → přední" : "Přední → zadní";
+}
+
+function sides(i){
+  const c = DECKS[deckKey].cards[i];
+  return reversed ? [c[1],c[0]] : c;
+}
+function faceHTML(text){
+  const [first,...rest] = text.split("\n");
+  const esc = s => s.replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
+  return '<div class="big">'+esc(first)+'</div>'+(rest.length?'<div class="small">'+esc(rest.join("\n"))+'</div>':'');
+}
+
+function render(){
+  const left = queue.length, doneN = total-left;
+  $("count").textContent = total ? `${doneN} / ${total} umím` : "";
+  $("bar").style.width = total ? (doneN/total*100)+"%" : "0";
+  const stage=$("stage");
+  if(!total){
+    stage.innerHTML='<div class="done"><p>Tenhle balíček je prázdný. Přidejte kartičky níže.</p></div>';
+    $("addBox").open=true; return;
+  }
+  if(!left){
+    stage.innerHTML='<div class="done"><p>Hotovo! Všech '+total+' kartiček.</p><button class="btn" id="again2">Znovu</button></div>';
+    $("again2").onclick=()=>start(); return;
+  }
+  const [f,b]=sides(queue[0]);
+  stage.innerHTML=`
+    <button class="card${flipped?" flipped":""}" id="card" aria-label="Otočit kartičku">
+      <div class="sizer" aria-hidden="true">${faceHTML(f.length>b.length?f:b)}</div>
+      <div class="face front"><div class="inner">${faceHTML(f)}</div><span class="hint">Klepnutím otočíte</span></div>
+      <div class="face back"><div class="inner">${faceHTML(b)}</div></div>
+    </button>
+    <div class="actions">
+      <button id="again" type="button" ${flipped?"":"disabled"}>Ještě jednou</button>
+      <button id="got" type="button" ${flipped?"":"disabled"}>Umím</button>
+    </div>`;
+  $("card").onclick=flip;
+  $("again").onclick=againCard;
+  $("got").onclick=gotCard;
+}
+function flip(){ if(!queue.length) return; flipped=!flipped; $("card").classList.toggle("flipped",flipped); $("again").disabled=$("got").disabled=!flipped; }
+function againCard(){ if(!flipped) return; const c=queue.shift(); queue.splice(Math.min(3,queue.length),0,c); flipped=false; saveProg(); render(); }
+function gotCard(){ if(!flipped) return; queue.shift(); flipped=false; saveProg(); render(); }
+
+document.addEventListener("keydown",e=>{
+  if(e.target.matches("input,textarea")) return;
+  if(e.key===" "){ e.preventDefault(); flip(); }
+  else if(e.key==="1") againCard();
+  else if(e.key==="2") gotCard();
+});
+$("shuffle").onclick=()=>start();
+$("dir").onclick=()=>{ reversed=!reversed; renderDecks(); start(false); };
+
+function renderMine(){
+  const ul=$("mineList"); ul.innerHTML="";
+  DECKS.moje.cards.forEach((c,i)=>{
+    const li=document.createElement("li");
+    const s=document.createElement("span"); s.textContent=c[0]+" – "+c[1].replace(/\n/g," / ");
+    const d=document.createElement("button"); d.type="button"; d.textContent="Smazat";
+    d.onclick=()=>{ DECKS.moje.cards.splice(i,1); store.set("myCards",DECKS.moje.cards); renderMine(); renderDecks(); if(deckKey==="moje") start(); };
+    li.append(s,d); ul.appendChild(li);
+  });
+}
+$("addForm").onsubmit=e=>{
+  e.preventDefault();
+  const f=$("fFront").value.trim(), b=$("fBack").value.trim();
+  if(!f||!b) return;
+  DECKS.moje.cards.push([f,b]); store.set("myCards",DECKS.moje.cards);
+  $("fFront").value=""; $("fBack").value=""; $("fFront").focus();
+  renderMine(); renderDecks(); if(deckKey==="moje") start();
+};
+
+const OWN = k => k==="myCards"||k==="deck"||k.startsWith("prog:");
+function exportCode(){
+  const data={};
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(OWN(k)) data[k]=localStorage.getItem(k); } }catch(e){}
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+$("exportBtn").onclick=async()=>{
+  const code=exportCode();
+  $("importCode").value=code;
+  try{ await navigator.clipboard.writeText(code); $("backupMsg").textContent="Kód zálohy je zkopírovaný."; }
+  catch(e){ $("importCode").select(); $("backupMsg").textContent="Kód je v poli výše. Zkopírujte ho ručně."; }
+};
+$("importForm").onsubmit=e=>{
+  e.preventDefault();
+  try{
+    const data=JSON.parse(decodeURIComponent(escape(atob($("importCode").value.trim()))));
+    for(const [k,v] of Object.entries(data)){ if(OWN(k)) localStorage.setItem(k,v); }
+    DECKS.moje.cards=store.get("myCards",[]);
+    deckKey=store.get("deck","vsechen"); if(!DECKS[deckKey]) deckKey="vsechen";
+    renderDecks(); renderMine(); start(false);
+    $("backupMsg").textContent="Záloha načtena.";
+  }catch(err){ $("backupMsg").textContent="Kód se nepodařilo načíst. Zkontrolujte, že je zkopírovaný celý."; }
+};
+
+renderDecks(); renderMine(); start(false);
+</script>
+</body>
+</html>
