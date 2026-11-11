@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kartičky: Czech flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9ECEF; --surface:#FFFFFF; --ink:#1C2430; --muted:#5B6675;
+  --sign:#A8232A; --line:#CDD3DA; --ok:#2F6B45; --warn:#8A5A12;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14181D; --surface:#1E242C; --ink:#E6EAEE; --muted:#9AA5B1;
+    --sign:#B8333A; --line:#333C47; --ok:#5FA77A; --warn:#D4A04E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14181D; --surface:#1E242C; --ink:#E6EAEE; --muted:#9AA5B1;
+  --sign:#B8333A; --line:#333C47; --ok:#5FA77A; --warn:#D4A04E;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 18px 48px}
+h1{font:600 1.7rem/1.2 "Literata",Georgia,serif;margin:0}
+h2{font:600 1.25rem/1.3 "Literata",Georgia,serif;margin:30px 0 10px}
+h3{margin:0;font-size:1.05rem}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.err{color:var(--sign);font-size:.9rem}
+.link{border:none;background:none;color:inherit;text-decoration:underline;cursor:pointer;font:inherit;padding:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px}
+.stat b{display:block;font:600 1.5rem/1.2 "Literata",Georgia,serif}
+.stat span{font-size:.85rem;color:var(--muted)}
+.panel{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:700 .98rem "Atkinson Hyperlegible",sans-serif;padding:10px 16px;border-radius:10px;border:1.5px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+select{width:auto}
+label{font-size:.9rem;color:var(--muted);display:grid;gap:4px}
+label.inline{display:flex;align-items:center;gap:8px}
+.form{display:grid;gap:10px;margin-top:12px}
+details summary{cursor:pointer;font-weight:700}
+.chart{display:flex;align-items:flex-end;gap:4px;height:56px;margin-top:10px}
+.chart div{flex:1;background:var(--ok);border-radius:3px 3px 0 0}
+.chart div.zero{background:var(--line)}
+.words{list-style:none;padding:0;margin:10px 0 0;max-height:340px;overflow:auto}
+.words li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.95rem}
+.words .en{color:var(--muted)}
+.meter{display:inline-flex;gap:3px;flex:none}
+.meter i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.meter i.on{background:var(--ok)}
+.del{border:none;background:none;color:var(--sign);cursor:pointer;font:inherit;font-size:.85rem}
+
+/* practice */
+.sesshead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.bar span{display:block;height:100%;background:var(--ok);transition:width .3s}
+.sign{background:var(--sign);color:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 0 rgba(0,0,0,.18),0 10px 24px -12px rgba(0,0,0,.35)}
+.sign .inner{border:3px solid rgba(255,255,255,.92);border-radius:9px;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 16px;gap:8px}
+.big{font:600 1.55rem/1.3 "Literata",Georgia,serif}
+.label{font-size:.92rem;opacity:.88}
+.answer{margin-top:16px;display:grid;gap:10px}
+.answer input{font-size:1.2rem;padding:12px;background:var(--surface)}
+.keys{display:flex;flex-wrap:wrap;gap:6px}
+.keys button{min-width:40px;padding:7px 0;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;font:inherit;cursor:pointer}
+.fb{background:var(--surface);border-radius:12px;padding:14px 16px;margin-top:14px;border:2px solid var(--line)}
+.fb p{margin:4px 0}
+.fb .verdict{font-weight:700;margin-bottom:8px}
+.fb.ok{border-color:var(--ok)} .fb.ok .verdict{color:var(--ok)}
+.fb.accent{border-color:var(--warn)} .fb.accent .verdict{color:var(--warn)}
+.fb.wrong{border-color:var(--sign)} .fb.wrong .verdict{color:var(--sign)}
+.fb .full{font-family:"Literata",Georgia,serif;font-size:1.1rem}
+.fb .tr{color:var(--muted);font-style:italic}
+.fb .btns{margin-top:12px}
+.why{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.why summary{font-weight:700;cursor:pointer;font-size:.95rem}
+.login{max-width:420px;margin:10vh auto 0}
+:focus-visible{outline:3px solid var(--ok);outline-offset:2px}
+@media (max-width:420px){.stat b{font-size:1.25rem}}
+@media (prefers-reduced-motion: reduce){.bar span{transition:none}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ===== NASTAVENÍ / SETTINGS =====
+   To sync progress across devices, paste your Supabase project URL and
+   publishable (anon) key below. Leave them empty to save progress only
+   in this browser. */
+const SUPABASE_URL = "";
+const SUPABASE_KEY = "";
+const NEW_PER_DAY = 10;                 // new cards introduced per deck per day
+const INTERVALS = [0, 1, 3, 7, 14, 30, 60]; // days until next review, by level
+
+/* ===== CARDS ===== */
+const CASES_EN = ["", "nominative", "genitive", "dative", "accusative", "vocative", "locative", "instrumental"];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+const CASE_INFO = ["",
+  "The nominative is the subject of the sentence: who or what is doing the action. It's the dictionary form.",
+  "The genitive expresses \"of\" (possession, amounts, \"the names of the students\"). It also follows prepositions like bez, z, do and u, and certain verbs like bát se and ptát se.",
+  "The dative marks the recipient: to or for whom something is given, said or done. It also follows verbs like rozumět and pomoct.",
+  "The accusative marks the direct object: the person or thing the action lands on (whom do I see? what do I know?). It also follows pro, and v/na when they mean motion toward a place.",
+  "The vocative is used when you call out to or address someone directly. In the plural it looks exactly like the nominative.",
+  "The locative is used only after the prepositions v, na, o, po and při, for location (where?) or topic (about what?).",
+  "The instrumental means \"with\" (after s/se) or \"by means of\". It also follows verbs like zabývat se and souviset s."
+];
+
+const GRAMMAR = {
+  vsechen: { name: "Všechen", desc: "Fill in the correct form of všechen", cards: [
+    {q:"S tebou můžu mluvit o ___.", a:["všem"], k:6, n:"singular", en:"I can talk to you about everything.",
+      why:"The preposition o (about) always takes the locative. The locative of všechno (everything) is všem."},
+    {q:"Ptal jsem se na to ___ učitelů.", a:["všech"], k:2, n:"plural", en:"I asked all the teachers about it.",
+      why:"The verb ptát se (to ask someone) takes the genitive: ptát se koho? Učitelů is already genitive plural, so všechen has to match it: všech."},
+    {q:"Znám ___ herce z divadla.", a:["všechny"], k:4, n:"plural", en:"I know all the actors from the theatre.",
+      why:"The actors are the direct object of znát (whom do I know?), so it's the accusative. In the accusative plural, masculine animate nouns use všechny, not všichni."},
+    {q:"Rozdal dárky ___ dětem.", a:["všem"], k:3, n:"plural", en:"He handed out presents to all the children.",
+      why:"The children are receiving the presents (to whom?), so it's the dative. Dětem is dative plural, and the dative plural of všechen is všem."},
+    {q:"Napsal jsem jména ___ studentů.", a:["všech"], k:2, n:"plural", en:"I wrote down the names of all the students.",
+      why:"\"The names of all the students\" is an \"of\" relationship, which is the genitive. Studentů is genitive plural, so all becomes všech."},
+    {q:"Pracovaly na tom ___ kolegyně.", a:["všechny"], k:1, n:"plural", en:"All the (female) colleagues worked on it.",
+      why:"The colleagues are the subject doing the work (who worked on it?), so it's the nominative. Kolegyně is feminine, and the feminine nominative plural is všechny. Všichni is only for masculine animate nouns."},
+    {q:"Znám ___ auta.", a:["všechna"], k:4, n:"plural", en:"I know all the cars.",
+      why:"The cars are the direct object of znát (what do I know?), so it's the accusative. Auto is neuter, and neuter plural uses všechna."},
+    {q:"Potřebuju ___ kamarády.", a:["všechny"], k:4, n:"plural", en:"I need all my friends.",
+      why:"The friends are the direct object of potřebovat (whom do I need?), so it's the accusative. In the accusative plural, even masculine animate nouns switch from všichni to všechny. The noun ending -y (kamarády) is a clue."},
+    {q:"Mluvil jsem se ___ kamarády.", a:["všemi"], k:7, n:"plural", en:"I talked with all my friends.",
+      why:"The preposition s/se (with) always takes the instrumental. The instrumental plural is všemi for every gender."},
+    {q:"Přišli ___ kamarádi.", a:["všichni"], k:1, n:"plural", en:"All the friends came.",
+      why:"The friends are the subject (who came?), so it's the nominative. Kamarád is masculine animate, the only gender that uses všichni. The noun ending -i (kamarádi) and the verb ending -i (přišli) are clues."},
+    {q:"Na výlet půjdeme se ___ spolužáky.", a:["všemi"], k:7, n:"plural", en:"We'll go on the trip with all our classmates.",
+      why:"The preposition s/se (with) always takes the instrumental. The instrumental plural is všemi."},
+    {q:"Bojí se úplně ___.", a:["všeho"], k:2, n:"singular", en:"He's afraid of absolutely everything.",
+      why:"The verb bát se (to be afraid of) takes the genitive: bát se čeho? The genitive of všechno is všeho."},
+    {q:"Mluvíme spolu o ___ problémech.", a:["všech"], k:6, n:"plural", en:"We talk together about all the problems.",
+      why:"The preposition o (about) always takes the locative. Problémech is locative plural, and the locative plural of všechen is všech."},
+    {q:"Už jsme viděli ___ památky.", a:["všechny"], k:4, n:"plural", en:"We've already seen all the sights.",
+      why:"The sights are the direct object of vidět (what did we see?), so it's the accusative. Památka is feminine, and the feminine accusative plural is všechny."},
+    {q:"___ jsem už zapomněl.", a:["všechno","vše"], k:4, n:"singular", en:"I've already forgotten everything.",
+      why:"Everything is what was forgotten (what did I forget?), so it's the accusative. Used on its own to mean \"everything\", the form is všechno (vše is more formal)."},
+    {q:"Rozumíš ___?", a:["všemu"], k:3, n:"singular", en:"Do you understand everything?",
+      why:"The verb rozumět always takes the dative: rozumět komu? čemu? The dative of všechno is všemu."},
+    {q:"Vypil jsi ___ čaj?", a:["všechen"], k:4, n:"singular", en:"Did you drink all the tea?",
+      why:"The tea is the direct object (what did you drink?), so it's the accusative. Čaj is masculine inanimate, and for those nouns the accusative looks like the nominative: všechen."},
+    {q:"Se ___ ti rád pomůžu.", a:["vším"], k:7, n:"singular", en:"I'll gladly help you with everything.",
+      why:"The preposition s/se (with) always takes the instrumental. The instrumental of všechno is vším."},
+    {q:"Ahoj ___! Jak se máte?", a:["všichni"], k:5, n:"plural", en:"Hi everyone! How are you?",
+      why:"You're calling out to people directly, which is the vocative. In the plural, the vocative looks exactly like the nominative, and for a group of people Czech uses the masculine animate form: všichni."},
+    {q:"Na stole ležely ___ ty staré knihy.", a:["všechny"], k:1, n:"plural", en:"All those old books were lying on the table.",
+      why:"The books are the subject (what was lying there?), so it's the nominative. Kniha is feminine, and the feminine nominative plural is všechny. The verb ending -y (ležely) is a clue that the subject isn't masculine animate."},
+    {q:"Snědli jsme ___ kapry.", a:["všechny"], k:4, n:"plural", en:"We ate all the carp.",
+      why:"The carp are the direct object (what did we eat?), so it's the accusative. Kapr counts as animate grammatically, even on a plate, and the masculine animate accusative plural is všechny."},
+    {q:"Mluvili jsme o ___ novinkách v práci.", a:["všech"], k:6, n:"plural", en:"We talked about all the news at work.",
+      why:"The preposition o (about) always takes the locative. Novinkách is locative plural, so all becomes všech."},
+    {q:"Viděl jsi už ___ ta nová auta?", a:["všechna"], k:4, n:"plural", en:"Have you seen all those new cars yet?",
+      why:"The cars are the direct object (what did you see?), so it's the accusative. Auto is neuter, and the neuter accusative plural is všechna. In casual speech you'll also hear všechny ty nový auta."}
+  ]},
+  pady: { name: "Pády (cases)", desc: "Which case? Type the number or the name.", cards: [
+    {q:"kdo? co?", c:1, en:"who? what?"},
+    {q:"koho? čeho?", c:2, en:"of whom? of what?"},
+    {q:"komu? čemu?", c:3, en:"to whom? to what?"},
+    {q:"koho? co?", c:4, en:"whom? what?"},
+    {q:"Ahoj, Petře! Mami!", c:5, en:"Hi, Petr! Mum!"},
+    {q:"o kom? o čem?", c:6, en:"about whom? about what?"},
+    {q:"kým? čím?", c:7, en:"with whom? with what?"}
+  ]},
+  vazby: { name: "Prepositions and verbs", desc: "Which case follows? Type the number or the name.", cards: [
+    {q:"s / se", c:7, m:"with", ex:"Mluvil jsem se všemi kamarády.", en:"I talked with all my friends."},
+    {q:"o", c:6, m:"about", ex:"Mluvíme o všem.", en:"We talk about everything."},
+    {q:"v / na (kde?)", c:6, m:"in, at (location)", ex:"Jsem na poště.", en:"I'm at the post office.",
+      why:"When v or na describes where something is (kde?), it takes the locative."},
+    {q:"v / na (kam?)", c:4, m:"to, into (direction)", ex:"Jdu na poštu.", en:"I'm going to the post office.",
+      why:"When v or na describes motion toward a place (kam?), it switches to the accusative."},
+    {q:"pro", c:4, m:"for", ex:"To je pro všechny.", en:"That's for everyone."},
+    {q:"bez", c:2, m:"without", ex:"Kafe bez cukru.", en:"Coffee without sugar."},
+    {q:"bát se", c:2, m:"to be afraid of", ex:"Bojím se všeho.", en:"I'm afraid of everything."},
+    {q:"bát se o", c:4, m:"to worry about", ex:"Bojím se o tebe.", en:"I worry about you.",
+      why:"Bát se on its own takes the genitive (afraid of), but bát se o means \"to worry about\", and o here takes the accusative."},
+    {q:"ptát se", c:2, m:"to ask (someone)", ex:"Ptal jsem se učitele.", en:"I asked the teacher."},
+    {q:"všimnout si", c:2, m:"to notice", ex:"Všimla jsem si chyby.", en:"I noticed the mistake."},
+    {q:"zúčastnit se", c:2, m:"to take part in", ex:"Zúčastnila se kurzu.", en:"She took part in the course."},
+    {q:"rozumět", c:3, m:"to understand", ex:"Rozumím všemu.", en:"I understand everything."},
+    {q:"pomoct", c:3, m:"to help", ex:"Pomůžu všem.", en:"I'll help everyone.",
+      why:"In Czech you help “to” someone, so pomoct takes the dative (pomoct komu?)."},
+    {q:"říct (komu?)", c:3, m:"to tell", ex:"Řekl jsem to všem.", en:"I told everyone.",
+      why:"The person you tell something to is the recipient, so it's the dative. The thing you say is in the accusative."},
+    {q:"zabývat se", c:7, m:"to deal with, to work on", ex:"Zabývám se veřejným zdravím.", en:"I work on public health."},
+    {q:"souviset s", c:7, m:"to be related to", ex:"To souvisí s prací.", en:"That's related to work."},
+    {q:"potýkat se s", c:7, m:"to struggle with", ex:"Potýkáme se s problémy.", en:"We're struggling with problems."}
+  ]}
+};
+
+/* Vocab: [czech, english]. Separate accepted translations with "/".
+   Text in (parentheses) is shown as a hint but not required. */
+const VOCAB = [
+  ["drát","wire"],["obydlí","dwelling"],["dočasný","temporary"],["větev","branch"],
+  ["bohoslužba","religious service/church service/mass"],["tvrdit","to assert/to insist/to claim"],
+  ["tvrzení","assertion/claim"],["kolísat","to vary/to fluctuate/to oscillate"],["uprchlík","refugee"],
+  ["na to, že","given that/considering that/the fact that"],["akorát","just right/only that/just"],
+  ["pochmurný","gloomy/sombre/somber"],["stěžovat si","to complain"],["střecha","roof"],
+  ["zasadit","to plant"],["plíseň","mould/mold/fungus"],["žito","rye"],["stodola","barn"],
+  ["vůbec netuším","I have no idea/no idea at all/I have no idea at all"],
+  ["souviset s","to be connected to/to be related to/to relate to"],
+  ["sebrat odvahu","to summon courage/to gather courage/to pluck up courage"],
+  ["okraj","edge/border/margin"],["útes","cliff/reef"],["opakovat","to repeat/to review"],
+  ["dálka","distance (colloquial)"],["vzdálenost","distance (formal)"],["vzdálený","distant/remote/far"],
+  ["oběť","victim/sacrifice"],["potýkat se s","to struggle with/to deal with/to grapple with"],
+  ["bát se o","to worry about (someone)"],["chřest","asparagus"],["plakát","poster"],
+  ["předválečný","pre-war/prewar"],["pohádka","fairy tale/fairytale"],["Ježibaba","witch (in fairy tales)"],
+  ["vlna","wave/wool"],["vlněný","woollen/woolen/wool"],["zvlněný","wavy/rolling/undulating"],
+  ["vlnobití","surf/breaking waves"],["vlnolam","breakwater"],
+  ["dokončit","to finish/to complete (something)"],["skončit","to end/to come to an end"],
+  ["dodat","to add/to supply/to deliver"],["tušit","to suspect/to sense/to have an inkling"]
+];
+
+/* ===== HELPERS ===== */
+const app = document.getElementById("app");
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const strip = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const norm = s => s.toLowerCase().replace(/[.,!?;:"“”„()]/g, " ").replace(/\s+/g, " ").trim();
+const normEn = s => norm(s.replace(/-/g, " ")).replace(/^(to|a|an|the) /, "").trim();
+const enAlts = en => en.replace(/\([^)]*\)/g, "").split("/").map(normEn).filter(Boolean);
+const showEn = en => en.split("/").join(" / ");
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function fmt(dt){ return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0"); }
+const today = () => fmt(new Date());
+function addDays(s, n){ const [y,m,d] = s.split("-").map(Number); return fmt(new Date(y, m-1, d+n)); }
+const LS = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+function parse(s){ try{ return s ? JSON.parse(s) : null; }catch(e){ return null; } }
+
+/* ===== STORAGE & SYNC ===== */
+const BASE = SUPABASE_URL.replace(/\/+$/, "");
+const cloudOn = !!(BASE && SUPABASE_KEY);
+let user = null, data = null, syncState = "local", saveTimer = null;
+
+function headers(){
+  const h = { apikey: SUPABASE_KEY, "Content-Type": "application/json" };
+  if(!SUPABASE_KEY.startsWith("sb_")) h.Authorization = "Bearer " + SUPABASE_KEY;
+  return h;
+}
+async function cloudLoad(u){
+  const r = await fetch(`${BASE}/rest/v1/progress?username=eq.${encodeURIComponent(u)}&select=data`, { headers: headers() });
+  if(!r.ok) throw new Error(r.status);
+  const rows = await r.json();
+  return rows[0] ? rows[0].data : null;
+}
+async function cloudSave(u, d){
+  const r = await fetch(`${BASE}/rest/v1/progress?on_conflict=username`, {
+    method: "POST",
+    headers: { ...headers(), Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({ username: u, data: d, updated_at: new Date().toISOString() })
+  });
+  if(!r.ok) throw new Error(r.status);
+}
+function blank(){ return { v:1, updated:0, cards:{}, custom:[], log:{}, dir:"en2cz" }; }
+function fixUp(d){
+  const b = blank();
+  d = d && typeof d === "object" ? d : b;
+  for(const k of Object.keys(b)) if(d[k] === undefined) d[k] = b[k];
+  return d;
+}
+function save(){
+  data.updated = Date.now();
+  LS.set("u:" + user, JSON.stringify(data));
+  if(cloudOn){ clearTimeout(saveTimer); saveTimer = setTimeout(pushCloud, 1200); }
+}
+async function pushCloud(){
+  clearTimeout(saveTimer); saveTimer = null;
+  try{ await cloudSave(user, data); syncState = "ok"; }catch(e){ syncState = "error"; }
+  updateSync();
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden" && saveTimer) pushCloud(); });
+
+function syncText(){
+  return { local:"Progress is saved in this browser only.", ok:"Progress is synced.",
+    error:"Sync failed. Your progress is saved in this browser for now.", loading:"Loading…" }[syncState];
+}
+function updateSync(){ const el = $("sync"); if(el){ el.textContent = syncText(); el.className = syncState === "error" ? "err" : "sub"; } }
+
+async function login(name){
+  user = name; LS.set("lastUser", name);
+  app.innerHTML = `<div class="login"><h1>Kartičky</h1><p class="sub">Loading your progress…</p></div>`;
+  const local = parse(LS.get("u:" + name));
+  let cloud = null;
+  syncState = cloudOn ? "loading" : "local";
+  if(cloudOn){ try{ cloud = await cloudLoad(name); syncState = "ok"; }catch(e){ syncState = "error"; } }
+  const pick = (local && cloud) ? ((local.updated||0) >= (cloud.updated||0) ? local : cloud) : (local || cloud);
+  data = fixUp(pick);
+  if(cloudOn && local && cloud && pick === local && (local.updated||0) > (cloud.updated||0)) pushCloud();
+  renderHome();
+}
+function logout(){ user = null; data = null; S = null; LS.del("lastUser"); renderLogin(); }
+
+/* ===== SPACED REPETITION ===== */
+function vocabList(){ return VOCAB.map(([cz,en]) => ({cz,en})).concat(data.custom); }
+function deckCards(key){
+  if(key === "slovicka") return vocabList().map(w => ({ id:"s:"+w.cz, kind:"vocab", ...w }));
+  return GRAMMAR[key].cards.map(c => ({ id:"g:"+key+":"+c.q, kind: c.c ? "case" : "text", ...c }));
+}
+const rec = id => data.cards[id];
+const isDue = id => { const r = rec(id); return !!r && r.d <= today(); };
+function newRoom(key){ const L = data.log[today()]; return Math.max(0, NEW_PER_DAY - ((L && L.new && L.new[key]) || 0)); }
+function deckCounts(key){
+  const cards = deckCards(key);
+  const due = cards.filter(c => isDue(c.id)).length;
+  const unseen = cards.filter(c => !rec(c.id)).length;
+  return { total: cards.length, due, fresh: Math.min(unseen, newRoom(key)) };
+}
+function buildSession(key, all){
+  const cards = deckCards(key);
+  if(all) return shuffle(cards);
+  const due = shuffle(cards.filter(c => isDue(c.id)));
+  const fresh = cards.filter(c => !rec(c.id)).slice(0, newRoom(key));
+  return due.concat(fresh);
+}
+function grade(card, correct, key){
+  const t = today();
+  const isNew = !data.cards[card.id];
+  const r = data.cards[card.id] || { b:0, d:t, s:0, c:0 };
+  r.s++;
+  if(correct){ r.c++; r.b = Math.min(r.b + 1, INTERVALS.length - 1); r.d = addDays(t, INTERVALS[r.b]); }
+  else { r.b = 0; r.d = t; }
+  data.cards[card.id] = r;
+  const L = data.log[t] || (data.log[t] = { n:0, ok:0, new:{} });
+  L.n++; if(correct) L.ok++;
+  if(isNew){ L.new = L.new || {}; L.new[key] = (L.new[key] || 0) + 1; }
+  save();
+}
+function streak(){
+  let d = today();
+  if(!(data.log[d] && data.log[d].n)) d = addDays(d, -1);
+  let k = 0;
+  while(data.log[d] && data.log[d].n){ k++; d = addDays(d, -1); }
+  return k;
+}
+const level = id => (rec(id) || {}).b || 0;
+function levelName(id){ const r = rec(id); if(!r) return "new"; return r.b >= 5 ? "mastered" : r.b >= 3 ? "known" : "learning"; }
+
+/* ===== LOGIN SCREEN ===== */
+function renderLogin(msg = ""){
+  app.innerHTML = `<div class="login">
+    <h1>Kartičky</h1>
+    <p class="sub">Enter a username. Your progress is saved under this name.</p>
+    <form id="lf" class="form">
+      <label>Username<input id="un" autocomplete="username" autocapitalize="none" spellcheck="false" required value="${esc(LS.get("lastUser") || "")}"></label>
+      <button class="btn" type="submit">Continue</button>
+    </form>
+    <p class="sub">${cloudOn ? "Use the same name on another device to open the same progress." : "Progress is saved in this browser only."}</p>
+    ${msg ? `<p class="err">${esc(msg)}</p>` : ""}
+  </div>`;
+  $("lf").onsubmit = e => {
+    e.preventDefault();
+    const u = $("un").value.trim().toLowerCase();
+    if(!/^[a-z0-9._-]{3,30}$/.test(u)) return renderLogin("Usernames need 3 to 30 characters: letters without accents, numbers, dots, hyphens or underscores.");
+    login(u);
+  };
+}
+
+/* ===== HOME SCREEN ===== */
+function chartHTML(){
+  const days = [];
+  for(let i = 13; i >= 0; i--){ const d = addDays(today(), -i); days.push([d, (data.log[d] || {}).n || 0]); }
+  const max = Math.max(1, ...days.map(x => x[1]));
+  return `<div class="chart" role="img" aria-label="Reviews over the last 14 days">${days.map(([d,n]) =>
+    `<div class="${n ? "" : "zero"}" style="height:${Math.max(4, n / max * 100)}%" title="${d}: ${n}"></div>`).join("")}</div>`;
+}
+function deckButtons(key){
+  const n = deckCounts(key), todo = n.due + n.fresh;
+  return { n, html: `<div class="btns">
+    <button class="btn" data-start="${key}" ${todo ? "" : "disabled"}>${todo ? `Start (${todo})` : "Done for today"}</button>
+    <button class="btn ghost" data-all="${key}">Practice all</button></div>` };
+}
+function renderHome(){
+  S = null;
+  const t = today();
+  const vocab = deckCards("slovicka");
+  const learned = vocab.filter(c => level(c.id) >= 3).length;
+  const todayN = (data.log[t] || {}).n || 0;
+  const v = deckButtons("slovicka");
+  const grammarPanels = Object.entries(GRAMMAR).map(([k, g]) => {
+    const b = deckButtons(k);
+    return `<div class="panel"><div class="row"><div><h3>${esc(g.name)}</h3>
+      <p class="sub">${b.n.due} due, ${b.n.fresh} new, ${b.n.total} total</p></div>${b.html}</div></div>`;
+  }).join("");
+  const words = vocab.slice().sort((a,b) => level(b.id) - level(a.id) || a.cz.localeCompare(b.cz, "cs"))
+    .map(w => {
+      const ci = data.custom.findIndex(x => x.cz === w.cz);
+      return `<li><span><b>${esc(w.cz)}</b> <span class="en">${esc(showEn(w.en))}</span></span>
+        <span class="btns"><span class="meter" title="${levelName(w.id)}" aria-label="${levelName(w.id)}">${[1,2,3,4,5,6].map(i => `<i class="${level(w.id) >= i ? "on" : ""}"></i>`).join("")}</span>
+        ${ci >= 0 ? `<button class="del" data-del="${ci}">Delete</button>` : ""}</span></li>`;
+    }).join("");
+
+  app.innerHTML = `
+    <div class="top"><h1>Kartičky</h1>
+      <span class="sub">${esc(user)} <button class="link" id="logout">Log out</button></span></div>
+    <p id="sync" class="${syncState === "error" ? "err" : "sub"}">${syncText()}</p>
+    <div class="stats">
+      <div class="stat"><b>${streak()}</b><span>day streak</span></div>
+      <div class="stat"><b>${learned} / ${vocab.length}</b><span>words known</span></div>
+      <div class="stat"><b>${todayN}</b><span>reviews today</span></div>
+    </div>
+
+    <h2>Vocabulary</h2>
+    <div class="panel">
+      <div class="row"><div><h3>My words</h3>
+        <p class="sub">${v.n.due} due, ${v.n.fresh} new</p></div>${v.html}</div>
+      <div class="row" style="margin-top:12px">
+        <label class="inline">Answer in
+          <select id="dir">
+            <option value="en2cz" ${data.dir === "en2cz" ? "selected" : ""}>Czech</option>
+            <option value="cz2en" ${data.dir === "cz2en" ? "selected" : ""}>English</option>
+            <option value="mix" ${data.dir === "mix" ? "selected" : ""}>Mixed</option>
+          </select></label>
+      </div>
+      ${chartHTML()}
+      <p class="sub">Reviews over the last 14 days</p>
+    </div>
+    <div class="panel"><details><summary>Add a word</summary>
+      <form id="addForm" class="form">
+        <label>Czech<input id="fCz" required autocapitalize="none" placeholder="e.g. stodola"></label>
+        <label>English (separate several translations with /)<input id="fEn" required autocapitalize="none" placeholder="e.g. barn"></label>
+        <button class="btn" type="submit">Add word</button>
+        <p id="addMsg" class="sub" role="status"></p>
+      </form></details></div>
+    <div class="panel"><details><summary>All words (${vocab.length})</summary>
+      <p class="sub">The dots show how well you know each word. Every correct answer moves it up a level and pushes its next review further out. A miss sends it back to the start.</p>
+      <ul class="words">${words}</ul></details></div>
+
+    <h2>Grammar</h2>
+    ${grammarPanels}
+
+    ${cloudOn ? "" : `<div class="panel" style="margin-top:24px"><details><summary>Move progress to another device</summary>
+      <p class="sub">Copy the backup code, then paste it on the other device while logged in with the same username.</p>
+      <div class="btns" style="margin-top:10px"><button class="btn ghost" id="exportBtn" type="button">Copy backup code</button></div>
+      <form id="importForm" class="form"><label>Backup code<textarea id="importCode" rows="3"></textarea></label>
+        <button class="btn" type="submit">Load backup</button></form>
+      <p class="sub" id="backupMsg" role="status"></p></details></div>`}
+  `;
+
+  $("logout").onclick = logout;
+  $("dir").onchange = e => { data.dir = e.target.value; save(); };
+  app.querySelectorAll("[data-start]").forEach(b => b.onclick = () => startSession(b.dataset.start, false));
+  app.querySelectorAll("[data-all]").forEach(b => b.onclick = () => startSession(b.dataset.all, true));
+  app.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
+    const w = data.custom[+b.dataset.del];
+    if(!w || !confirm(`Delete “${w.cz}”?`)) return;
+    data.custom.splice(+b.dataset.del, 1); delete data.cards["s:" + w.cz]; save(); renderHome();
+  });
+  $("addForm").onsubmit = e => {
+    e.preventDefault();
+    const cz = $("fCz").value.trim(), en = $("fEn").value.trim();
+    if(!cz || !en) return;
+    if(vocabList().some(w => w.cz.toLowerCase() === cz.toLowerCase())){ $("addMsg").textContent = `“${cz}” is already in the list.`; return; }
+    data.custom.push({ cz, en }); save(); renderHome();
+  };
+  if(!cloudOn){
+    $("exportBtn").onclick = async () => {
+      const code = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      $("importCode").value = code;
+      try{ await navigator.clipboard.writeText(code); $("backupMsg").textContent = "Backup code copied."; }
+      catch(err){ $("importCode").select(); $("backupMsg").textContent = "The code is in the box. Copy it manually."; }
+    };
+    $("importForm").onsubmit = e => {
+      e.preventDefault();
+      try{
+        const d = JSON.parse(decodeURIComponent(escape(atob($("importCode").value.trim()))));
+        if(!d || typeof d !== "object" || !d.cards) throw new Error("bad");
+        data = fixUp(d); save(); renderHome();
+      }catch(err){ $("backupMsg").textContent = "That code couldn’t be loaded. Check that you copied all of it."; }
+    };
+  }
+}
+
+/* ===== PRACTICE ===== */
+let S = null;
+function startSession(key, all){
+  const queue = buildSession(key, all);
+  if(!queue.length) return;
+  S = { key, queue, total: queue.length, done: 0 };
+  nextCard();
+}
+function nextCard(){
+  if(!S.queue.length) return renderDone();
+  const c = S.queue[0];
+  S.answered = false; S.verdict = null; S.input = "";
+  if(c.kind === "vocab") S.ask = data.dir === "mix" ? (Math.random() < .5 ? "cz" : "en") : (data.dir === "cz2en" ? "en" : "cz");
+  renderSession();
+}
+function parseCase(s){
+  const t = strip(s.toLowerCase());
+  const m = t.match(/[1-7]/); if(m) return +m[0];
+  const keys = [[1,["nom"]],[2,["gen"]],[3,["dat"]],[4,["aku","acc","akk"]],[5,["vok","voc"]],[6,["lok","loc"]],[7,["ins"]]];
+  for(const [n, ks] of keys) if(ks.some(k => t.includes(k))) return n;
+  return 0;
+}
+function check(c, input){
+  if(c.kind === "case") return parseCase(input) === c.c ? "ok" : "wrong";
+  if(c.kind === "vocab" && S.ask === "en"){
+    const u = normEn(input), squash = x => x.replace(/ /g, "");
+    return enAlts(c.en).some(a => a === u || squash(a) === squash(u)) ? "ok" : "wrong";
+  }
+  const alts = (c.kind === "text" ? c.a : [c.cz]).map(norm);
+  const u = norm(input);
+  if(alts.includes(u)) return "ok";
+  if(u && alts.map(strip).includes(strip(u))) return "accent";
+  return "wrong";
+}
+function whyHTML(c){
+  if(c.kind === "vocab") return "";
+  const k = c.kind === "case" ? c.c : c.k;
+  const reason = c.why || (c.m ? `${c.q} (${c.m}) is always followed by the ${CASES_EN[k]}.` : "");
+  return `${reason ? `<p><b>Why the ${CASES_EN[k]}?</b> ${esc(reason)}</p>` : ""}<p class="sub">${esc(CASE_INFO[k])}</p>`;
+}
+function feedbackHTML(c){
+  const v = S.verdict;
+  const head = v === "ok" ? "Correct!" : v === "accent" ? "Almost! Watch the accents." : "Not this time.";
+  let body = "";
+  if(c.kind === "text"){
+    body = `<p class="full">${esc(c.q).replace("___", "<b>" + esc(c.a[0]) + "</b>")}</p>`
+      + `<p>${cap(CASES_EN[c.k])} ${c.n} (${c.k}. pád)</p><p class="tr">${esc(c.en)}</p>`;
+  }else if(c.kind === "case"){
+    body = `<p><b>${cap(CASES_EN[c.c])}</b> (${c.c}. pád)</p>`
+      + (c.m ? `<p>${esc(c.q)} = ${esc(c.m)}</p>` : "")
+      + (c.ex ? `<p class="full">${esc(c.ex)}</p>` : "")
+      + `<p class="tr">${esc(c.en)}</p>`;
+  }else{
+    body = `<p class="full"><b>${esc(c.cz)}</b> = ${esc(showEn(c.en))}</p>`;
+  }
+  const why = whyHTML(c);
+  const whyBlock = !why ? "" : v === "wrong"
+    ? `<div class="why">${why}</div>`
+    : `<details class="why"><summary>Why?</summary>${why}</details>`;
+  const yours = v !== "ok" && S.input.trim() ? `<p class="sub">Your answer: ${esc(S.input)}</p>` : "";
+  return `<div class="fb ${v}" role="status"><p class="verdict">${head}</p>${body}${whyBlock}${yours}
+    <div class="btns">${v === "wrong" ? `<button class="btn ghost" id="override" type="button">I was right</button>` : ""}
+    <button class="btn" id="next" type="button">Next</button></div></div>`;
+}
+function renderSession(){
+  const c = S.queue[0];
+  let big, label;
+  if(c.kind === "vocab"){ big = S.ask === "cz" ? showEn(c.en) : c.cz; label = S.ask === "cz" ? "Type it in Czech" : "Type it in English"; }
+  else { big = c.q; label = GRAMMAR[S.key].desc; }
+  const needsCz = c.kind === "text" || (c.kind === "vocab" && S.ask === "cz");
+  app.innerHTML = `
+    <div class="sesshead"><button class="link" id="quit" type="button">Back to overview</button>
+      <span class="sub">${S.done} / ${S.total}</span></div>
+    <div class="bar"><span style="width:${S.done / S.total * 100}%"></span></div>
+    <div class="sign"><div class="inner"><div class="big">${esc(big)}</div><div class="label">${esc(label)}</div></div></div>
+    <form class="answer" id="af">
+      <input id="ans" aria-label="Your answer" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
+        placeholder="Your answer" value="${esc(S.input)}" ${S.answered ? "readonly" : ""}>
+      ${needsCz && !S.answered ? `<div class="keys">${"áčďéěíňóřšťúůýž".split("").map(ch => `<button type="button" data-ch="${ch}">${ch}</button>`).join("")}</div>` : ""}
+      ${S.answered ? "" : `<button class="btn" type="submit">Check</button>`}
+    </form>
+    ${S.answered ? feedbackHTML(c) : ""}`;
+  $("quit").onclick = renderHome;
+  if(!S.answered){
+    const inp = $("ans");
+    app.querySelectorAll("[data-ch]").forEach(b => {
+      b.onmousedown = e => e.preventDefault();
+      b.onclick = () => {
+        const s = inp.selectionStart ?? inp.value.length, e2 = inp.selectionEnd ?? s;
+        inp.value = inp.value.slice(0, s) + b.dataset.ch + inp.value.slice(e2);
+        inp.focus(); inp.setSelectionRange(s + 1, s + 1);
+      };
+    });
+    $("af").onsubmit = e => {
+      e.preventDefault();
+      S.input = inp.value; S.verdict = check(c, S.input); S.answered = true;
+      renderSession();
+    };
+    inp.focus();
+  }else{
+    $("next").onclick = () => commit(S.verdict !== "wrong");
+    if($("override")) $("override").onclick = () => commit(true);
+    $("next").focus();
+  }
+}
+function commit(correct){
+  const c = S.queue.shift();
+  grade(c, correct, S.key);
+  if(correct) S.done++;
+  else S.queue.splice(Math.min(3, S.queue.length), 0, c);
+  nextCard();
+}
+function renderDone(){
+  const key = S.key;
+  app.innerHTML = `<div class="panel" style="margin-top:10vh;text-align:center;padding:28px 20px">
+    <h2 style="margin-top:0">Done!</h2>
+    <p>You went through ${S.total} ${S.total === 1 ? "card" : "cards"}.</p>
+    <div class="btns" style="justify-content:center;margin-top:14px">
+      <button class="btn" id="home" type="button">Back to overview</button>
+      <button class="btn ghost" id="again" type="button">Practice all again</button></div></div>`;
+  $("home").onclick = renderHome;
+  $("again").onclick = () => startSession(key, true);
+  $("home").focus();
+}
+
+/* ===== START ===== */
+const last = LS.get("lastUser");
+if(last) login(last); else renderLogin();
+</script>
+</body>
+</html>
